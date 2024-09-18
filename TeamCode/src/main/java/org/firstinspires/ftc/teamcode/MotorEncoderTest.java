@@ -12,6 +12,39 @@ public class MotorEncoderTest extends LinearOpMode {
     private DcMotor rightFrontDrive;
     private DcMotor rightBackDrive;
 
+
+    @Override
+
+    public void runOpMode() {
+        // Initialize the hardware variables
+        leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontLeft");
+        leftBackDrive  = hardwareMap.get(DcMotor.class, "backLeft");
+        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontRight");
+        rightBackDrive = hardwareMap.get(DcMotor.class, "backRight");
+
+        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+
+        // Set the motor to run using encoders
+        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+        double targetMM = 200;
+        moveMillimeters(targetMM, "forwards"); //move forward 20cm
+        moveMillimeters(targetMM/2, "backwards"); //back 10
+        moveMillimeters(targetMM/2, "forwards"); //forward 10
+        moveMillimeters(targetMM, "backwards"); //back 20 hopefully to starting position
+    }
+
     public void moveMillimeters(double targetMM, String dir){
         double conversionTickOverMM = 1.6243;
         int targetPosition = (int)(targetMM * conversionTickOverMM);
@@ -61,38 +94,5 @@ public class MotorEncoderTest extends LinearOpMode {
         leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-    }
-    @Override
-    public void runOpMode() {
-        // Initialize the hardware variables
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontLeft");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "backLeft");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontRight");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "backRight");
-
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-
-        // Set the motor to run using encoders
-        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-        double targetMM = 200;
-        moveMillimeters(targetMM, "forwards"); //move forward 20cm
-        moveMillimeters(targetMM/2, "backwards"); //back 10
-        moveMillimeters(targetMM/2, "forwards"); //forward 10
-        moveMillimeters(targetMM, "backwards"); //back 20 hopefully to starting position
-
-
     }
 }
