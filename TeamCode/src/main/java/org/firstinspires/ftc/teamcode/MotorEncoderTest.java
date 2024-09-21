@@ -61,7 +61,8 @@ public class MotorEncoderTest extends LinearOpMode {
         double baseSize = 18;
         double radius = (baseSize/2) * (Math.sqrt(2));
         double radians = (Math.PI*targetDegrees)/180;
-        double targetMM = radius * radians; //arc length = theta r
+        double targetInch = radius * radians; //arc length = theta r
+        double targetMM = targetInch * 25.4; //convert inch to mm
 
         int targetPosition = (int)(targetMM * conversionTickOverMM);
 
