@@ -120,36 +120,6 @@ public class Robot{
         frontRight.setPower(0);
         frontLeft.setPower(0);
     }
-    public void rc_control(){
-        // Setup a variable for each drive wheel to save power level for telemetry
-        double leftPower;
-        double rightPower;
-
-        //Flipped x and y because motors are flipped - 12/16
-        double drive = gamepad1.left_stick_y; //controls drive by moving up or down.
-        double turn = gamepad1.right_stick_x;
-        double strafe = gamepad1.left_stick_x;
-
-        telemetry.addData("Drive Power: ", drive);
-        telemetry.addData("Turning Value: ", turn);
-        telemetry.addData("Strafing Value: ", strafe);
-        telemetry.addLine();
-
-        leftPower = Range.clip(drive - turn, -MAX_POWER, MAX_POWER);
-        rightPower = Range.clip(drive + turn, -MAX_POWER, MAX_POWER);
-
-        // Send calculated power to wheels
-        frontLeft.setPower(Range.clip(leftPower-strafe, -MAX_POWER, MAX_POWER));
-        frontRight.setPower(Range.clip(rightPower+strafe, -MAX_POWER, MAX_POWER));
-        backLeft.setPower(Range.clip(leftPower+strafe, -MAX_POWER, MAX_POWER));
-        backRight.setPower(Range.clip(rightPower-strafe, -MAX_POWER, MAX_POWER));
-
-        // RC movement WITHOUT combined strafing
-//        frontLeft.setPower(leftPower);
-//        backLeft.setPower(leftPower);
-//        frontRight.setPower(rightPower);
-//        backRight.setPower(rightPower);
-    }
     // given parameters for speed, angle, and strafe power, send power to the motors
     // inspired by MIT RACECAR system where it sends (speed, angle) to the car
     public void powerMotors(double speed, double angle, double strafe){
@@ -162,15 +132,12 @@ public class Robot{
         backLeft.setPower(Range.clip(leftPower+strafe, -MAX_POWER, MAX_POWER));
         backRight.setPower(Range.clip(rightPower-strafe, -MAX_POWER, MAX_POWER));
     }
-
     /**
      * Uses encoders to move in specific directions
      * forward = moving forward
      * backward = moving backward
-     * counterclockwise = moving counterclockwise
-     * clockwise = moving clockwise
      */
-    public void moveRobotwEncoders(String direction, double inches, double speed){
+    public void moveRobotwEncoders(String direction, double centimeters, double speed){
         // Reset the encoder
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -182,7 +149,8 @@ public class Robot{
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        double target = 45.2; // may have to find a way to convert from inches to ticks
+        double conversionTickOverCM = 1.6243;
+        double target= (centimeters * conversionTickOverCM);
 
         double leftPower = speed;
         double rightPower = speed;
@@ -201,20 +169,6 @@ public class Robot{
                 
                 leftPower *= -1;
                 rightPower *= -1;
-            case "counterclockwise":
-                frontLeft.setTargetPosition(-(int)target);
-                backLeft.setTargetPosition(-(int)target);
-                frontRight.setTargetPosition((int)target);
-                backRight.setTargetPosition((int)target);
-                
-                leftPower *= -1;
-            case "clockwise":
-                frontLeft.setTargetPosition((int)target);
-                backLeft.setTargetPosition((int)target);
-                frontRight.setTargetPosition(-(int)target);
-                backRight.setTargetPosition(-(int)target);
-                
-                rightPower *= -1;
         }
 
         // Set the motor to run to the target position
@@ -229,6 +183,24 @@ public class Robot{
         backLeft.setPower(leftPower);
         frontRight.setPower(rightPower);
         backRight.setPower(rightPower);
+
+        // Wait until the motors reach the target position
+        while (frontLeft.isBusy()) {
+            telemetry.addData("Left Front Current Position", frontLeft.getCurrentPosition());
+            telemetry.addData("Left Back Current Position", backLeft.getCurrentPosition());
+            telemetry.addData("Right Front Current Position", frontRight.getCurrentPosition());
+            telemetry.addData("Right Back Current Position", backRight.getCurrentPosition());
+            telemetry.update();
+        }
+
+        // Stop the motors
+        brake();
+
+        // Reset the motor mode
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
 
