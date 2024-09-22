@@ -14,6 +14,7 @@ public class tutorial extends OpMode
     {
         motor = hardwareMap.get(DcMotor.class, ""); // add device name from motors in control hub
         telemetry.addData("Hardware: ", "Initialized");
+        telemetry.update();
     }
     @Override
     public void loop()
