@@ -12,6 +12,12 @@ public class MotorEncoderTest extends LinearOpMode {
     private DcMotor rightFrontDrive;
     private DcMotor rightBackDrive;
 
+//    static final double     COUNTS_PER_MOTOR_REV    = 537.7 ; THIS IS NOT CORRECT NEED TO FIX THE VALUE
+//    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;
+//    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ; THIS IS NOT CORRECT
+//    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+//    static final double     DRIVE_SPEED             = 0.6;
+//    static final double     TURN_SPEED              = 0.5;
 
     @Override
 
@@ -40,8 +46,11 @@ public class MotorEncoderTest extends LinearOpMode {
         waitForStart();
         double targetMM = 200;
         moveMillimeters(targetMM, "forwards"); //move forward 20cm
+        sleep(1000);
         moveMillimeters(targetMM/2, "backwards"); //back 10
+        sleep(1000);
         moveMillimeters(targetMM/2, "forwards"); //forward 10
+        sleep(1000);
         moveMillimeters(targetMM, "backwards"); //back 20 hopefully to starting position
         moveMillimeters(targetMM, "forwards");
         turnDegrees(180, "clockwise");
@@ -116,7 +125,12 @@ public class MotorEncoderTest extends LinearOpMode {
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
     public void moveMillimeters(double targetMM, String dir){
-        double conversionTickOverMM = 1.6243;
+        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        double conversionTickOverMM = 1.624; //1.6243 originally
         int targetPosition = (int)(targetMM * conversionTickOverMM);
 
         leftFrontDrive.setTargetPosition(targetPosition);
