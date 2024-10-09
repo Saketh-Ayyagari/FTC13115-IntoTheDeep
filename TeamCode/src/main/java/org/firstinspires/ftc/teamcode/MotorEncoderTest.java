@@ -12,12 +12,12 @@ public class MotorEncoderTest extends LinearOpMode {
     private DcMotor rightFrontDrive;
     private DcMotor rightBackDrive;
 
-//    static final double     COUNTS_PER_MOTOR_REV    = 537.7 ; THIS IS NOT CORRECT NEED TO FIX THE VALUE
-//    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;
-//    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ; THIS IS NOT CORRECT
-//    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
-//    static final double     DRIVE_SPEED             = 0.6;
-//    static final double     TURN_SPEED              = 0.5;
+    static final double     COUNTS_PER_MOTOR_REV    = 2786.2 ;
+    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;
+    static final double     WHEEL_DIAMETER_MM   = 104 ;
+    static final double     COUNTS_PER_MM         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_MM * Math.PI);
+    static final double     DRIVE_SPEED             = 0.6;
+    static final double     TURN_SPEED              = 0.5;
 
     @Override
 
@@ -60,8 +60,7 @@ public class MotorEncoderTest extends LinearOpMode {
         rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        double conversionTickOverMM = 1.624; //1.6243 originally
-        int targetPosition = (int)(targetMM * conversionTickOverMM);
+        int targetPosition = (int)(targetMM * COUNTS_PER_MM);
 
         leftFrontDrive.setTargetPosition(targetPosition);
         leftBackDrive.setTargetPosition(targetPosition);
@@ -78,9 +77,9 @@ public class MotorEncoderTest extends LinearOpMode {
         // Set the motor power
         double powerLevel = 0; //powerlevel for all motors because we are only moving forward or backward here
         if (dir.equals("forwards")) {
-            powerLevel = 0.5;
+            powerLevel = DRIVE_SPEED;
         }else if (dir.equals("backwards")){
-            powerLevel = -0.5;
+            powerLevel = -DRIVE_SPEED;
         }
         leftFrontDrive.setPower(powerLevel);
         leftBackDrive.setPower(powerLevel);
