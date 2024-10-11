@@ -102,13 +102,13 @@ public class IMUAssistedTeleop extends OpMode{
 
         // receiving IMU Angular Velocity Values
         AngularVelocity angularVelocity = imu.getRobotAngularVelocity(AngleUnit.DEGREES);
+        int turningSpeed = 10;
 
         double heading = orientation.getYaw(AngleUnit.DEGREES);
 
         if(state.equals("unlock")){
-            SETPOINT = Range.clip(turn, -179, 180); //something based on turn variable Maybe delete the .clip thingy???? Unsure
+            SETPOINT = angleWrap(orientation.getYaw(AngleUnit.DEGREES) + (turn*turningSpeed));///Range.clip(turn, -179, 180); //something based on turn variable Maybe delete the .clip thingy???? Unsure
         }
-
         double rotation_speed = PIDControl(SETPOINT, heading);
 
         //drivetrain.rotate(rotation_speed); //convert to using drivetrain.powerMotors
@@ -134,6 +134,15 @@ public class IMUAssistedTeleop extends OpMode{
 
 
 
+    }
+
+    public double angleWrap(double degrees){
+        if (degrees>180){
+            degrees -= 360;
+        }else if(degrees < -180){
+            degrees += 360;
+        }
+        return degrees;
     }
 
     public double PIDControl(double setpoint, double current){
