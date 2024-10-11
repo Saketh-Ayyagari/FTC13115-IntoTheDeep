@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.Range;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="EncoderMotorTest", group="Linear Opmode")
 
@@ -18,6 +19,14 @@ public class MotorEncoderTest extends LinearOpMode {
     static final double     COUNTS_PER_MM         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_MM * Math.PI);
     static final double     DRIVE_SPEED             = 0.6;
     static final double     TURN_SPEED              = 0.5;
+
+
+    private final double Kp = 0.03125;
+    private final double Ki = 0;
+    private final double Kd = 0;
+    private Double prevError = 0.0;
+    private double error_sum = 0;
+    double SETPOINT = 0;
 
     @Override
 
@@ -108,4 +117,26 @@ public class MotorEncoderTest extends LinearOpMode {
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
+    public double angleWrap(double degrees){
+        if (degrees>180){
+            degrees -= 360;
+        }else if(degrees < -180){
+            degrees += 360;
+        }
+        return degrees;
+    }
+    /*
+
+    public double PIDControl(double setpoint, double current){
+        double error = setpoint - current;
+        double P_error = Kp*error;
+        // calculates derivative error
+        double D_error = Kd * (error - prevError)/runtime.seconds();
+        prevError = error;
+        // resets timer for recalculating derivative error
+        resetRuntime();
+
+        return Range.clip(P_error + D_error, -MAX_POWER, MAX_POWER);
+    }*/
 }

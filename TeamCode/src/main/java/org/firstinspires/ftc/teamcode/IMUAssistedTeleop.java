@@ -64,7 +64,9 @@ public class IMUAssistedTeleop extends OpMode{
         drivetrain = new Robot(hardwareMap);
         drivetrain.init();
         // initializing IMU
+        imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(myIMUParameters);
+        imu.resetYaw();
         //reset yaw
 
     }
@@ -72,9 +74,6 @@ public class IMUAssistedTeleop extends OpMode{
         runtime.reset();
     }
     public void loop(){
-        // Setup a variable for each drive wheel to save power level for telemetry
-        double leftPower;
-        double rightPower;
 
         // Create an object to receive the IMU angles
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
@@ -102,7 +101,7 @@ public class IMUAssistedTeleop extends OpMode{
 
         // receiving IMU Angular Velocity Values
         AngularVelocity angularVelocity = imu.getRobotAngularVelocity(AngleUnit.DEGREES);
-        int turningSpeed = 10;
+        int turningSpeed = 20;
 
         double heading = orientation.getYaw(AngleUnit.DEGREES);
 
@@ -111,9 +110,11 @@ public class IMUAssistedTeleop extends OpMode{
         }
         double rotation_speed = PIDControl(SETPOINT, heading);
 
-        //drivetrain.rotate(rotation_speed); //convert to using drivetrain.powerMotors
+        drivetrain.rotate(rotation_speed); //convert to using drivetrain.powerMotors
         drivetrain.powerMotors(drive, rotation_speed, strafe);
 
+
+        //drivetrain.powerMotors(drive, turn, strafe);
 
         telemetry.addData("frontLeftPower", drivetrain.frontLeft.getPower());
         telemetry.addData("frontRightPower", drivetrain.frontRight.getPower());
@@ -123,9 +124,9 @@ public class IMUAssistedTeleop extends OpMode{
         telemetry.addData("Yaw (Z)", "%.2f Deg. (Heading)", orientation.getYaw(AngleUnit.DEGREES));
         telemetry.addData("Pitch (X)", "%.2f Deg.", orientation.getPitch(AngleUnit.DEGREES));
         telemetry.addData("Roll (Y)", "%.2f Deg.\n", orientation.getRoll(AngleUnit.DEGREES));
-        telemetry.addData("Yaw (Z) velocity", "%.2f Deg/Sec", angularVelocity.zRotationRate);
+        /*telemetry.addData("Yaw (Z) velocity", "%.2f Deg/Sec", angularVelocity.zRotationRate);
         telemetry.addData("Pitch (X) velocity", "%.2f Deg/Sec", angularVelocity.xRotationRate);
-        telemetry.addData("Roll (Y) velocity", "%.2f Deg/Sec", angularVelocity.yRotationRate);
+        telemetry.addData("Roll (Y) velocity", "%.2f Deg/Sec", angularVelocity.yRotationRate);*/
         telemetry.addLine();
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
