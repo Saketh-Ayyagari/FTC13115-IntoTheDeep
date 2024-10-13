@@ -61,8 +61,78 @@ public class MotorEncoderTest extends LinearOpMode {
         moveMillimeters(targetMM/2, "forwards"); //forward 10
         sleep(1000);
         moveMillimeters(targetMM, "backwards"); //back 20 hopefully to starting position
+        moveMillimeters(targetMM, "forwards");
+        turnDegrees(180, "clockwise");
+        moveMillimeters(targetMM/2, "forwards");
+        turnDegrees(360, "counterclockwise");
+        moveMillimeters(targetMM/2, "forwards");
     }
 
+    public void turnDegrees(double targetDegrees, String dir){
+        //need to figure out how to do the math between turning motors and how it relates to the robot actually turning
+        double conversionTickOverMM = 1.6243;
+        //distance wheels need to travel is the arc length of the circle circumscribed by the base of the robot
+        //(ASSUMING THE ROBOT IS A SQUARE AND EACH WHEEL IS EQUA-DISTANT)
+        //radius is the side length of the base (18 for now)/2 time sqrt2 (makes a 45 45 90 triangle)
+        //then to find arc length its theta (r)
+        //we get degrees so convert to radians and multiply by our radius
+        double baseSize = 18;
+        double radius = (baseSize/2) * (Math.sqrt(2));
+        double radians = (Math.PI*targetDegrees)/180;
+        double targetInch = radius * radians; //arc length = theta r
+        double targetMM = targetInch * 25.4; //convert inch to mm
+
+        int targetPosition = (int)(targetMM * conversionTickOverMM);
+
+        leftFrontDrive.setTargetPosition(targetPosition);
+        leftBackDrive.setTargetPosition(targetPosition);
+        rightFrontDrive.setTargetPosition(targetPosition);
+        rightBackDrive.setTargetPosition(targetPosition);
+
+
+        // Set the motor to run to the target position
+        leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // Set the motor power
+        double leftPowerLevel = 0;
+        double rightPowerLevel = 0;//powerlevel for all motors because we are only moving forward or backward here
+        if (dir.equals("clockwise")) {
+            leftPowerLevel = 0.5;
+            rightPowerLevel = -0.5;
+        }else if (dir.equals("counterclockwise")){
+            leftPowerLevel = -0.5;
+            rightPowerLevel = 0.5;
+        }
+        leftFrontDrive.setPower(leftPowerLevel);
+        leftBackDrive.setPower(leftPowerLevel);
+        rightFrontDrive.setPower(rightPowerLevel);
+        rightBackDrive.setPower(rightPowerLevel);
+
+
+        // Wait until the motor reaches the target position
+        while (opModeIsActive() && leftFrontDrive.isBusy()) {
+            telemetry.addData("Left Front Current Position", leftFrontDrive.getCurrentPosition());
+            telemetry.addData("Left Back Current Position", leftBackDrive.getCurrentPosition());
+            telemetry.addData("Right Front Current Position", rightFrontDrive.getCurrentPosition());
+            telemetry.addData("Right Back Current Position", rightBackDrive.getCurrentPosition());
+            telemetry.update();
+        }
+
+        // Stop the motor
+        leftFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        rightBackDrive.setPower(0);
+
+        // Reset the motor mode
+        leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
     public void moveMillimeters(double targetMM, String dir){
         leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
