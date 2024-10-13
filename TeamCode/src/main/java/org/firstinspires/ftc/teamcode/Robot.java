@@ -49,15 +49,16 @@ public class Robot{
     private final int CAMERA_WIDTH = 640;
     private final int CAMERA_HEIGHT = 480;
     // maximum power robot can drive
-    public final double MAX_POWER = 0.6;
+    public double MAX_POWER;
 
     private Telemetry telemetry;
 
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
-    public Robot(HardwareMap hwMp){
+    public Robot(HardwareMap hwMp, double max_power){
         this.hardwareMp = hwMp;
+        this.MAX_POWER = max_power;
     }
     public void init(){
         // initializes all motors
