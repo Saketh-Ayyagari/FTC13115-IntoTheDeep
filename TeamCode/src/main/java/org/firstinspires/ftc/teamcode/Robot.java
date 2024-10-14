@@ -41,13 +41,6 @@ public class Robot{
     public DcMotor frontRight;
     public DcMotor backRight;
 
-    // variables for camera use
-    private int cameraMonitorViewId;
-    private OpenCvCamera camera;
-    private WebcamName webcamName;
-    // camera resolution variables
-    private final int CAMERA_WIDTH = 640;
-    private final int CAMERA_HEIGHT = 480;
     // maximum power robot can drive
     public double MAX_POWER;
 
