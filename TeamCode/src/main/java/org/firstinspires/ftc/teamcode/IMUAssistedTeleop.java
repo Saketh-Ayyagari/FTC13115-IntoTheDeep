@@ -61,7 +61,7 @@ public class IMUAssistedTeleop extends OpMode{
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        drivetrain = new Robot(hardwareMap);
+        drivetrain = new Robot(hardwareMap, 0.5);
         drivetrain.init();
         // initializing IMU
         imu = hardwareMap.get(IMU.class, "imu");
@@ -139,7 +139,7 @@ public class IMUAssistedTeleop extends OpMode{
     }
 
     public double angleWrap(double degrees){
-        if (degrees>180){
+        if (degrees > 180){
             degrees -= 360;
         }else if(degrees < -180){
             degrees += 360;
