@@ -36,7 +36,7 @@ public class IMUAssistedTeleop extends OpMode{
     // PID Values
     private final double Kp = 0.03125;
     private final double Ki = 0;
-    private final double Kd = 0;
+    private final double Kd = 0.005;
     private Double prevError = 0.0;
     private double error_sum = 0;
     double SETPOINT = 0;
@@ -83,7 +83,8 @@ public class IMUAssistedTeleop extends OpMode{
         double turn = gamepad1.right_stick_x; // controls turning
         double strafe = gamepad1.left_stick_x; // controls strafing
 
-        if (turn != 0){
+        double tolerance = 0.05;
+        if (turn > tolerance || turn < -tolerance){
             state = "unlock";
         }
         else{
