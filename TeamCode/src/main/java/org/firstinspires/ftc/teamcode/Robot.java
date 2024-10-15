@@ -44,16 +44,17 @@ public class Robot{
     // maximum power robot can drive
     public double MAX_POWER;
 
-    private Telemetry telemetry;
+    private Telemetry telemetry; // for FTC dashboard--will integrate later
 
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
-    public Robot(HardwareMap hwMp, double max_power){
-        this.hardwareMp = hwMp;
+    public Robot(double max_power){
+//        this.hardwareMp = hwMp;
         this.MAX_POWER = max_power;
     }
-    public void init(){
+    public void init(HardwareMap hwMp){
+        hardwareMp = hwMp;
         // initializes all motors
         backRight = hardwareMp.get(DcMotor.class, "backRight"); //port 3
         frontRight = hardwareMp.get(DcMotor.class, "frontRight"); //port 2
@@ -75,18 +76,6 @@ public class Robot{
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
-//    public void forward(double power){
-//        frontLeft.setPower(-power);
-//        backLeft.setPower(-power);
-//        frontRight.setPower(-power);
-//        backRight.setPower(-power);
-//    }
-//    public void backward(double power){
-//        frontLeft.setPower(power);
-//        backLeft.setPower(power);
-//        frontRight.setPower(power);
-//        backRight.setPower(power);
-//    }
     /*
     * Positive power = rotate counterclockwise (causes heading to become larger)
     * Negative power = rotate clockwise (causes heading to become smaller)
@@ -102,12 +91,6 @@ public class Robot{
      * Negative Power = strafe left
      * Positive power = strafe right
      * */
-    public void strafe(double power){
-        frontLeft.setPower(-power);
-        backLeft.setPower(power);
-        frontRight.setPower(power);
-        backRight.setPower(-power);
-    }
     public void brake(){
         backRight.setPower(0);
         backLeft.setPower(0);
