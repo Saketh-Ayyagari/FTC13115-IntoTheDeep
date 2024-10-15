@@ -33,10 +33,12 @@ public class IMUAssistedTeleop extends OpMode{
     private Robot drivetrain;
     private IMU.Parameters myIMUParameters;
     private IMU imu;
+
+    double tolerance = 0.05;
     // PID Values
     private final double Kp = 0.03125;
     private final double Ki = 0;
-    private final double Kd = 0;
+    private final double Kd = 0.005;
     private Double prevError = 0.0;
     private double error_sum = 0;
     double SETPOINT = 0;
@@ -61,8 +63,8 @@ public class IMUAssistedTeleop extends OpMode{
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        drivetrain = new Robot(hardwareMap);
-        drivetrain.init();
+        drivetrain = new Robot(0.5);
+        drivetrain.init(hardwareMap);
         // initializing IMU
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(myIMUParameters);
@@ -83,7 +85,7 @@ public class IMUAssistedTeleop extends OpMode{
         double turn = gamepad1.right_stick_x; // controls turning
         double strafe = gamepad1.left_stick_x; // controls strafing
 
-        if (turn != 0){
+        if (turn > tolerance || turn < -tolerance){
             state = "unlock";
         }
         else{
@@ -138,7 +140,7 @@ public class IMUAssistedTeleop extends OpMode{
     }
 
     public double angleWrap(double degrees){
-        if (degrees>180){
+        if (degrees > 180){
             degrees -= 360;
         }else if(degrees < -180){
             degrees += 360;

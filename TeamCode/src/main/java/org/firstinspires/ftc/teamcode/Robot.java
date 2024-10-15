@@ -159,7 +159,15 @@ public class Robot{
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        double target = 45.2; // may have to find a way to convert from inches to ticks
+
+        double     COUNTS_PER_MOTOR_REV    = 2786.2 ;
+        double     DRIVE_GEAR_REDUCTION    = 1.0 ;
+        double     WHEEL_DIAMETER_IN   = 4.09449;
+        double     COUNTS_PER_IN         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_IN * Math.PI);
+        double     DRIVE_SPEED             = 0.6;
+        double     TURN_SPEED              = 0.5;
+
+        double target = inches * COUNTS_PER_IN; // may have to find a way to convert from inches to ticks
 
         double leftPower = speed;
         double rightPower = speed;
