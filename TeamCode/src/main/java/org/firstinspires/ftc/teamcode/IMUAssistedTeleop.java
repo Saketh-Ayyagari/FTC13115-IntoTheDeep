@@ -36,9 +36,9 @@ public class IMUAssistedTeleop extends OpMode{
 
     double tolerance = 0.05;
     // PID Values
-    private final double Kp = 0.03125;
-    private final double Ki = 0;
-    private final double Kd = 0.005;
+    private final double Kp = -0.03125;
+    private final double Ki = 0.0;
+    private final double Kd = 0.0;
     private Double prevError = 0.0;
     private double error_sum = 0;
     double SETPOINT = 0;
@@ -70,15 +70,11 @@ public class IMUAssistedTeleop extends OpMode{
         imu.initialize(myIMUParameters);
         imu.resetYaw();
         //reset yaw
-
     }
     public void start() {
         runtime.reset();
     }
     public void loop(){
-
-        // Create an object to receive the IMU angles
-        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
 
         //Flipped x and y because motors are flipped - 12/16
         double drive = gamepad1.left_stick_y; //controls drive by moving up or down.
@@ -103,17 +99,18 @@ public class IMUAssistedTeleop extends OpMode{
 
         // receiving IMU Angular Velocity Values
         AngularVelocity angularVelocity = imu.getRobotAngularVelocity(AngleUnit.DEGREES);
-        int turningSpeed = 20;
-
+        // Create an object to receive the IMU angles
+        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+        
         double heading = orientation.getYaw(AngleUnit.DEGREES);
 
         if(state.equals("unlock")){
-            SETPOINT = angleWrap(orientation.getYaw(AngleUnit.DEGREES) + (turn*turningSpeed));///Range.clip(turn, -179, 180); //something based on turn variable Maybe delete the .clip thingy???? Unsure
+            SETPOINT = orientation.getYaw(AngleUnit.DEGREES);///Range.clip(turn, -179, 180); //something based on turn variable Maybe delete the .clip thingy???? Unsure
         }
-        double rotation_speed = PIDControl(SETPOINT, heading);
-
-        drivetrain.rotate(rotation_speed); //convert to using drivetrain.powerMotors
-        drivetrain.powerMotors(drive, rotation_speed, strafe);
+        if(state.equals("lock")){
+            turn = PIDControl(SETPOINT, heading);
+        }
+        drivetrain.powerMotors(drive, turn, strafe);
 
 
         //drivetrain.powerMotors(drive, turn, strafe);
