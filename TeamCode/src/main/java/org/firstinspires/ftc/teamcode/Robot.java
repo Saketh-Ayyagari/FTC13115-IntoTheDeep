@@ -1,39 +1,23 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
 /**
  * Saketh Ayyagari
  * "Robot" class for motor control
  */
-public class Robot{
+public class Robot
+{
+    protected Object init;
     private HardwareMap hardwareMp;
     // Declare OpMode members for each of the 4 motors.
     public DcMotor frontLeft;
@@ -81,18 +65,18 @@ public class Robot{
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
-//    public void forward(double power){
-//        frontLeft.setPower(-power);
-//        backLeft.setPower(-power);
-//        frontRight.setPower(-power);
-//        backRight.setPower(-power);
-//    }
-//    public void backward(double power){
-//        frontLeft.setPower(power);
-//        backLeft.setPower(power);
-//        frontRight.setPower(power);
-//        backRight.setPower(power);
-//    }
+    public void forward(double power){
+        frontLeft.setPower(-power);
+        backLeft.setPower(-power);
+        frontRight.setPower(-power);
+        backRight.setPower(-power);
+    }
+    public void backward(double power){
+        frontLeft.setPower(power);
+        backLeft.setPower(power);
+        frontRight.setPower(power);
+        backRight.setPower(power);
+    }
     /*
     * Positive power = rotate counterclockwise (causes heading to become larger)
     * Negative power = rotate clockwise (causes heading to become smaller)
@@ -170,7 +154,7 @@ public class Robot{
      * counterclockwise = moving counterclockwise
      * clockwise = moving clockwise
      */
-    public void moveRobotwEncoders(String direction, double inches, double speed){
+    public void moveRobotEncoders(int direction, double inches, double speed){
         // Reset the encoder
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -233,4 +217,3 @@ public class Robot{
     }
 
 }
-
