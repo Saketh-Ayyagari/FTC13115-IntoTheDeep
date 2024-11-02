@@ -118,8 +118,4 @@ public class IMUAutonomousRelativeTurning extends LinearOpMode {
         return orientation.getYaw(AngleUnit.DEGREES);
     }
 
-    public void goingForward()
-    {
-        //.setPower(0.8);
-    }
 }
