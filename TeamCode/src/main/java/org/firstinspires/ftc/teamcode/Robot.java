@@ -147,7 +147,7 @@ public class Robot{
      * counterclockwise = moving counterclockwise
      * clockwise = moving clockwise
      */
-    public void moveRobotwEncoders(String direction, double inches, double speed){
+    public void moveRobotwEncoders(String direction, double inches){
         // Reset the encoder
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -169,8 +169,8 @@ public class Robot{
 
         double target = inches * COUNTS_PER_IN; // may have to find a way to convert from inches to ticks
 
-        double leftPower = speed;
-        double rightPower = speed;
+        double leftPower = this.MAX_POWER;
+        double rightPower = this.MAX_POWER;
 
         switch(direction){
             case "forward":
@@ -200,6 +200,11 @@ public class Robot{
                 backRight.setTargetPosition(-(int)target);
                 
                 rightPower *= -1;
+            case "strafe_left":
+
+
+            case "strafe_right":
+
         }
 
         // Set the motor to run to the target position
@@ -214,8 +219,6 @@ public class Robot{
         backLeft.setPower(leftPower);
         frontRight.setPower(rightPower);
         backRight.setPower(rightPower);
-
     }
-
 }
 

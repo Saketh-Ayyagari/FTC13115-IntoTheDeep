@@ -50,7 +50,7 @@ public class IMUAssistedTeleop extends OpMode{
      **/
     private String state = "lock";
 
-    private static final double MAX_POWER = 0.4;
+    private static final double MAX_POWER = 0.83;
 
     @Override
     public void init(){
@@ -63,7 +63,7 @@ public class IMUAssistedTeleop extends OpMode{
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        drivetrain = new Robot(1);
+        drivetrain = new Robot(MAX_POWER);
         drivetrain.init(hardwareMap);
         // initializing IMU
         imu = hardwareMap.get(IMU.class, "imu");
