@@ -209,4 +209,38 @@ public class MotorEncoderTest extends LinearOpMode {
 
         return Range.clip(P_error + D_error, -MAX_POWER, MAX_POWER);
     }*/
+    // Method to move the robot forward a specified distance in mm
+    public void moveForward(double distanceMM) {
+        // Reset motor encoders to start from zero
+
+        // Calculate target position in encoder counts
+        int targetPosition = (int)(distanceMM * COUNTS_PER_MM);
+
+        // Set target position for each motor
+        leftFrontDrive.setTargetPosition(targetPosition);
+        leftBackDrive.setTargetPosition(targetPosition);
+        rightFrontDrive.setTargetPosition(targetPosition);
+        rightBackDrive.setTargetPosition(targetPosition);
+
+        // Set the motors to run to the target position
+        leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // Set the motor power to drive forward
+        leftFrontDrive.setPower(DRIVE_SPEED);
+        leftBackDrive.setPower(DRIVE_SPEED);
+        rightFrontDrive.setPower(DRIVE_SPEED);
+        rightBackDrive.setPower(DRIVE_SPEED);
+
+        // Wait until the motors reach the target position
+        while (opModeIsActive() && leftFrontDrive.isBusy() && rightFrontDrive.isBusy()) {
+            // Optional: Update telemetry to monitor position
+            telemetry.addData("Left Front Position", leftFrontDrive.getCurrentPosition());
+            telemetry.addData("Right Front Position", rightFrontDrive.getCurrentPosition());
+            telemetry.update();
+        }
+    }
+
 }
