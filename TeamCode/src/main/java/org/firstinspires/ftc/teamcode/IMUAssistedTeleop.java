@@ -50,7 +50,7 @@ public class IMUAssistedTeleop extends OpMode{
      **/
     private String state = "lock";
 
-    private static final double MAX_POWER = 0.4;
+    private static final double MAX_POWER = 1;
 
     @Override
     public void init(){
