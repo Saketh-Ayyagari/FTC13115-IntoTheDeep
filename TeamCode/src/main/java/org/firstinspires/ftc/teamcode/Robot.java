@@ -34,8 +34,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
  * "Robot" class for motor control
  */
 public class Robot{
-    private HardwareMap hardwareMp;
-    // Declare OpMode members for each of the 4 motors.
+    private HardwareMap hardwareMp; // initializing motors/sensors;
+    // Declare OpMode members for each of the chassis motors.
     public DcMotor frontLeft;
     public DcMotor backLeft;
     public DcMotor frontRight;
@@ -50,7 +50,6 @@ public class Robot{
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
     public Robot(double max_power){
-//        this.hardwareMp = hwMp;
         this.MAX_POWER = max_power;
     }
     public void init(HardwareMap hwMp){
@@ -127,11 +126,10 @@ public class Robot{
 //        frontRight.setPower(rightPower);
 //        backRight.setPower(rightPower);
     }
-    // given parameters for speed, angle, and strafe power, send power to the motors
-    // inspired by MIT RACECAR system where it sends (speed, angle) to the car
-    public void powerMotors(double speed, double angle, double strafe){
-        double leftPower = Range.clip(speed - angle, -MAX_POWER, MAX_POWER);
-        double rightPower = Range.clip(speed + angle, -MAX_POWER, MAX_POWER);
+    // given parameters for drive, rotation, and strafe power, send power to the motors
+    public void powerMotors(double drive, double turn, double strafe){
+        double leftPower = Range.clip(drive - turn, -MAX_POWER, MAX_POWER);
+        double rightPower = Range.clip(drive + turn, -MAX_POWER, MAX_POWER);
 
         // Send calculated power to wheels
         frontLeft.setPower(Range.clip(leftPower-strafe, -MAX_POWER, MAX_POWER));
@@ -172,6 +170,7 @@ public class Robot{
         double leftPower = this.MAX_POWER;
         double rightPower = this.MAX_POWER;
 
+        // different scenarios based on direction specified
         switch(direction){
             case "forward":
                 frontLeft.setTargetPosition((int)target);
@@ -200,10 +199,6 @@ public class Robot{
                 backRight.setTargetPosition(-(int)target);
                 
                 rightPower *= -1;
-            case "strafe_left":
-
-
-            case "strafe_right":
 
         }
 
