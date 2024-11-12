@@ -66,7 +66,7 @@ public class IMUAssistedTeleop extends OpMode{
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        drivetrain = new Robot(1);
+        drivetrain = new Robot(0.5);
         drivetrain.init(hardwareMap);
         // initializing IMU
         imu = hardwareMap.get(IMU.class, "imu");
