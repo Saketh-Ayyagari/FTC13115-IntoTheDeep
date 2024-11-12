@@ -10,19 +10,28 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+
 @Autonomous(name="IMUAutonomousRelativeTurning", group="Autonomous")
 public class IMUAutonomousRelativeTurning extends LinearOpMode {
-    // initializing robot, IMU, and IMU parameter objects
     private ElapsedTime runtime = new ElapsedTime();
     private Robot drivetrain;
     private IMU.Parameters myIMUParameters;
     private IMU imu;
-    // max speed the robot will move
-    private static final double MAX_POWER = 0.3;
+
+    // PID Values
+    private final double Kp = -0.03125;
+    private final double Ki = 0.0;
+    private final double Kd = 0.0;
+    private Double prevError = 0.0;
+    private double error_sum = 0;
+
+    // Tolerance for PID control and setpoint change
+    private double tolerance = 0.5; // degree tolerance to consider heading reached
+    private static final double MAX_POWER = 0.4;
 
     @Override
     public void runOpMode() {
-        // Initial setup for IMU--initializes parameters based on IMU orientation
+        // Initial setup for IMU
         myIMUParameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
@@ -31,52 +40,80 @@ public class IMUAutonomousRelativeTurning extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        // creating and initializing Robot object
-        drivetrain = new Robot(MAX_POWER);
+
+        drivetrain = new Robot(0.5);
         drivetrain.init(hardwareMap);
 
         // Initializing the IMU
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(myIMUParameters);
-        imu.resetYaw(); // Reset the IMU heading to 0 degrees
+        imu.resetYaw();
 
         waitForStart();
         runtime.reset();
 
         // Example action: Turn 90 degrees clockwise and move forward
-        turnRelative(90);  // Turn 90 degrees counterclockwise
-        // positive = counterclockwise
-        // negative = clockwise
+        turnToHeading(90);   // Turn 90 degrees
+        drivetrain.moveRobotwEncoders("forward", 10, drivetrain.MAX_POWER );
+        turnToHeading(180);  // Turn to 180 degrees
+        drivetrain.moveRobotwEncoders("forward", 10, drivetrain.MAX_POWER );
     }
 
     /**
-     * Turn the robot to a target heading relative to the robot.
-     * @param relativeDegrees The degrees to turn relative to the current heading.
+     * Turn the robot to the specified heading.
+     * @param relativeTargetHeading The heading in degrees to turn to.
      */
-    public void turnRelative(double relativeDegrees) { // must be between -180 and 180
-        imu.resetYaw();
-        // Keep turning until the robot heading is greater than the target heading
-        while (Math.abs(getHeading()) < Math.abs(relativeDegrees)) {
-            // Turn left or right based on the sign of the heading value
-            if (relativeDegrees > 0) {
-                drivetrain.powerMotors(0, MAX_POWER, 0); // Turn right
-            }
-            else{
-                drivetrain.powerMotors(0, -MAX_POWER, 0);
-            }
+    public void turnToHeading(double relativeTargetHeading) {
+        double setpoint = angleWrap(getHeading() + relativeTargetHeading);  // Calculate new heading setpoint
+        double currentHeading = getHeading();
 
-            telemetry.addData("Current Heading", getHeading());
-            telemetry.addData("Target Heading", relativeDegrees);
+        // Turn until the setpoint is reached
+        while (Math.abs(angleWrap(setpoint - currentHeading)) > tolerance) {
+            currentHeading = getHeading();
+            double turn = PIDControl(setpoint, currentHeading);
+            drivetrain.powerMotors(0, turn, 0); // only turning
+            telemetry.addData("Current Heading", currentHeading);
+            telemetry.addData("Target Setpoint", setpoint);
             telemetry.update();
         }
-        // Stop the robot once the target heading is reached
-        drivetrain.brake();
+
+    }
+
+    /**
+     * Move the robot forward for the specified duration.
+     * @param moveDuration The time in seconds to move forward.
+     */
+
+    /**
+     * PID controller for maintaining the heading.
+     */
+    public double PIDControl(double setpoint, double current){
+        double error = angleWrap(setpoint - current);
+        double P_error = Kp * error;
+        double D_error = Kd * (error - prevError) / runtime.seconds();
+        prevError = error;
+        // Resets timer for recalculating derivative error
+        resetRuntime();
+
+        return Range.clip(P_error + D_error, -MAX_POWER, MAX_POWER);
+    }
+
+    /**
+     * Ensure angle stays between -180 and 180 degrees.
+     */
+    public double angleWrap(double degrees) {
+        if (degrees > 180) {
+            degrees -= 360;
+        } else if (degrees < -180) {
+            degrees += 360;
+        }
+        return degrees;
     }
 
     /**
      * Get the current heading of the robot in degrees.
      */
-    public double getHeading() { //
+    public double getHeading() {
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         return orientation.getYaw(AngleUnit.DEGREES);
     }
