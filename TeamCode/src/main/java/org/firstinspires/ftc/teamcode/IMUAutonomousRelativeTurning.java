@@ -3,13 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import org.firstinspires.ftc.teamcode.MotorEncoderTest;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
 
 @Autonomous(name="IMUAutonomousRelativeTurning", group="Autonomous")
 public class IMUAutonomousRelativeTurning extends LinearOpMode {
@@ -20,10 +20,10 @@ public class IMUAutonomousRelativeTurning extends LinearOpMode {
 
     // PID Values
     private final double Kp = -0.03125;
-    private final double Ki = 0.0; // no usage... will it be used?
+    private final double Ki = 0.0;
     private final double Kd = 0.0;
     private Double prevError = 0.0;
-    private double error_sum = 0; // no usage... will it be used?
+    private double error_sum = 0;
 
     // Tolerance for PID control and setpoint change
     private double tolerance = 0.5; // degree tolerance to consider heading reached
@@ -33,13 +33,13 @@ public class IMUAutonomousRelativeTurning extends LinearOpMode {
     public void runOpMode() {
         // Initial setup for IMU
         myIMUParameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot
-                        (RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                         RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)
         );
-
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
 
         drivetrain = new Robot(0.5);
         drivetrain.init(hardwareMap);
@@ -57,8 +57,6 @@ public class IMUAutonomousRelativeTurning extends LinearOpMode {
         drivetrain.moveRobotwEncoders("forward", 10, drivetrain.MAX_POWER );
         turnToHeading(180);  // Turn to 180 degrees
         drivetrain.moveRobotwEncoders("forward", 10, drivetrain.MAX_POWER );
-
-
     }
 
     /**
