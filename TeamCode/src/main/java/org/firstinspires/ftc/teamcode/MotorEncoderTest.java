@@ -188,6 +188,21 @@ public class MotorEncoderTest extends LinearOpMode {
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    public void MoveForward(int duration, double power)
+    {
+        leftFrontDrive.setPower(power);
+        rightFrontDrive.setPower(power);
+        leftBackDrive.setPower(power);
+        rightBackDrive.setPower(power);
+
+        sleep(duration);
+        leftFrontDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightBackDrive.setPower(0);
+
+    }
+
     public double angleWrap(double degrees){
         if (degrees>180){
             degrees -= 360;
