@@ -196,6 +196,20 @@ public class MotorEncoderTest extends LinearOpMode {
         }
         return degrees;
     }
+    public void moveForward(int duration, double power)
+    {
+        leftFrontDrive.setPower(power);
+        leftBackDrive.setPower(power);
+        rightFrontDrive.setPower(power);
+        rightBackDrive.setPower(power);
+
+        sleep(duration);
+        leftFrontDrive.setPower(0);
+        leftBackDrive.setPower(0);
+        rightFrontDrive.setPower(0);
+        rightBackDrive.setPower(0);
+
+    }
     /*
 
     public double PIDControl(double setpoint, double current){
