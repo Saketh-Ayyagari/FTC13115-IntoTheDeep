@@ -50,14 +50,14 @@ public class IMUAutonomousRelativeTurning extends LinearOpMode {
     }
 
     /**
-     * Turn the robot to a relative target heading.
+     * Turn the robot to a target heading relative to the robot.
      * @param relativeDegrees The degrees to turn relative to the current heading.
      */
     public void turnRelative(double relativeDegrees) { // must be between -180 and 180
         imu.resetYaw();
         // Keep turning until the robot heading is greater than the target heading
         while (Math.abs(getHeading()) < Math.abs(relativeDegrees)) {
-            // Simple control: turn left or right based on the sign of the heading value
+            // Turn left or right based on the sign of the heading value
             if (relativeDegrees > 0) {
                 drivetrain.powerMotors(0, MAX_POWER, 0); // Turn right
             }
