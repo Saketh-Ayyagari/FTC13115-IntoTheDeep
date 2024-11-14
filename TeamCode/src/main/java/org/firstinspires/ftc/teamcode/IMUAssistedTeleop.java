@@ -24,9 +24,12 @@ import java.util.Set;
  * IMU-assisted controller using a finite State machine
  * Inspiration taken from 8/24 workshop
  **/
+/**
+ * DISABLED AFTER 11/2 MEET FOR INCONSISTENCIES
+ * **/
 
 @TeleOp(name="IMUAssistedTeleop", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class IMUAssistedTeleop extends OpMode{
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
