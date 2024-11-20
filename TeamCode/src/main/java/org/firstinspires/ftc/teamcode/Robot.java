@@ -124,7 +124,7 @@ public class Robot{
      * counterclockwise = moving counterclockwise
      * clockwise = moving clockwise
      */
-    public void moveRobotwEncoders(String direction, double inches, double MAX_POWER){
+    public void moveRobotwEncoders(String direction, double inches){
         // Reset the encoder
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
