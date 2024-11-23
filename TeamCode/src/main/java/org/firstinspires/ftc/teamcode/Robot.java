@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
@@ -32,6 +33,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 /**
  * Saketh Ayyagari
  * "Robot" class for motor control
+ * READ BEFORE MODIFYING: any mention of left, right, back, etc. are from the perspective of behind the
+ * robot.
  */
 public class Robot{
     private HardwareMap hardwareMp; // initializing motors/sensors;
@@ -40,6 +43,10 @@ public class Robot{
     public DcMotor backLeft;
     public DcMotor frontRight;
     public DcMotor backRight;
+
+    // motors for slide and intake control
+    public DcMotor slide;
+    public Servo extend, left, right;
 
     // maximum power robot can drive
     public double MAX_POWER;
@@ -60,20 +67,26 @@ public class Robot{
         backLeft = hardwareMp.get(DcMotor.class, "backLeft"); //port 1
         frontLeft = hardwareMp.get(DcMotor.class, "frontLeft"); //port 0
 
+        slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
+
+
         backRight.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
+        //slide.setDirection(DcMotor.Direction.REVERSE);
 
         // setting the mode of each motor to run without encoders
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //start at 0 power
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     /*
     * Positive power = rotate counterclockwise (causes heading to become larger)
@@ -95,36 +108,6 @@ public class Robot{
         backLeft.setPower(0);
         frontRight.setPower(0);
         frontLeft.setPower(0);
-    }
-    public void rc_control(){
-        // Setup a variable for each drive wheel to save power level for telemetry
-        double leftPower;
-        double rightPower;
-
-        //Flipped x and y because motors are flipped - 12/16
-        double drive = gamepad1.left_stick_y; //controls drive by moving up or down.
-        double turn = gamepad1.right_stick_x;
-        double strafe = gamepad1.left_stick_x;
-
-        telemetry.addData("Drive Power: ", drive);
-        telemetry.addData("Turning Value: ", turn);
-        telemetry.addData("Strafing Value: ", strafe);
-        telemetry.addLine();
-
-        leftPower = Range.clip(drive - turn, -MAX_POWER, MAX_POWER);
-        rightPower = Range.clip(drive + turn, -MAX_POWER, MAX_POWER);
-
-        // Send calculated power to wheels
-        frontLeft.setPower(Range.clip(leftPower-strafe, -MAX_POWER, MAX_POWER));
-        frontRight.setPower(Range.clip(rightPower+strafe, -MAX_POWER, MAX_POWER));
-        backLeft.setPower(Range.clip(leftPower+strafe, -MAX_POWER, MAX_POWER));
-        backRight.setPower(Range.clip(rightPower-strafe, -MAX_POWER, MAX_POWER));
-
-        // RC movement WITHOUT combined strafing
-//        frontLeft.setPower(leftPower);
-//        backLeft.setPower(leftPower);
-//        frontRight.setPower(rightPower);
-//        backRight.setPower(rightPower);
     }
     // given parameters for drive, rotation, and strafe power, send power to the motors
     public void powerMotors(double drive, double turn, double strafe){
