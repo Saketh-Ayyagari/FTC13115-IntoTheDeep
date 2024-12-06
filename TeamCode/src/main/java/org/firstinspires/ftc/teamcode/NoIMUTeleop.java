@@ -23,7 +23,7 @@ public class NoIMUTeleop extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
 
-    private final double MAX_POWER = 0.8;
+    private final double MAX_POWER = 0.4;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -46,11 +46,24 @@ public class NoIMUTeleop extends OpMode
      */
     @Override
     public void loop() {
+        // TURNING TEMPORARILY DISABLED -- 11/25
+        double drive = gamepad1.left_stick_y; // moving forward or backward
+        double turn = gamepad1.right_stick_x; // strafing left or right
+        double strafe = gamepad1.left_stick_x; // turning clockwise or counterclockwise
+        double lift = gamepad1.left_trigger - gamepad1.right_trigger; // lifting the slide
 
-        double drive = gamepad1.left_stick_y; //controls drive by moving up or down.
-        double turn = gamepad1.right_stick_x;
-        double strafe = gamepad1.left_stick_x;
+        drivetrain.powerMotors(drive, turn, strafe); // sends individual powers to the motors
+        drivetrain.liftSlide(lift);
 
-        drivetrain.powerMotors(drive, turn, strafe);
+        if (gamepad1.x){
+            drivetrain.roll_in();
+        }
+        if (gamepad1.b){
+            drivetrain.roll_out();
+        }
+        if (gamepad1.a){
+            drivetrain.liftServo(0.25);
+        }
+        drivetrain.stop_intake();
     }
 }
