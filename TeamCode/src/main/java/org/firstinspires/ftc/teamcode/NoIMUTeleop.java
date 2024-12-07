@@ -23,8 +23,8 @@ public class NoIMUTeleop extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
 
-    private final double MAX_POWER = 0.4;
-    /*
+    private final double MAX_POWER = 0.7;
+    /*git 
      * Code to run ONCE when the driver hits INIT
      */
     private Robot drivetrain = new Robot(MAX_POWER);
@@ -55,15 +55,24 @@ public class NoIMUTeleop extends OpMode
         drivetrain.powerMotors(drive, turn, strafe); // sends individual powers to the motors
         drivetrain.liftSlide(lift);
 
-        if (gamepad1.x){
+        if (gamepad1.right_bumper){
             drivetrain.roll_in();
         }
-        if (gamepad1.b){
+        if (gamepad1.left_bumper){
             drivetrain.roll_out();
         }
         if (gamepad1.a){
-            drivetrain.liftServo(0.25);
+            drivetrain.liftServo(0.3);
         }
-        drivetrain.stop_intake();
+        if (gamepad1.b){
+            drivetrain.liftServo(0.13);
+        }
+        if (gamepad1.x){
+            drivetrain.liftServo(0.5);
+        }
+        else{
+            drivetrain.stop_intake();
+        }
+
     }
 }

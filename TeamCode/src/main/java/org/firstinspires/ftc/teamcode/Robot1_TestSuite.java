@@ -2,6 +2,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 
 
 
-@TeleOp(name="Robot1_TestSuite", group="Linear OpMode")
+@Autonomous(name="Robot1_TestSuite", group="Linear OpMode")
 //@Disabled
 public class Robot1_TestSuite extends LinearOpMode {
 
@@ -30,22 +31,13 @@ public class Robot1_TestSuite extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-
-        enma.moveRobotwEncoders("forward", 10);
-        enma.turnDegrees(90, "clockwise");
-        enma.moveRobotwEncoders("forward", 10);// run once
-        enma.turnDegrees(90, "clockwise");
-        enma.moveRobotwEncoders("forward", 10);
-        enma.turnDegrees(90, "clockwise");
-        enma.moveRobotwEncoders("forward", 10);// run once
-
-        enma.turnDegrees(90, "clockwise");
-
-        enma.turnDegrees(90, "counterclockwise");
-        enma.liftSlideAuto(100, "up");
-        enma.liftSlideAuto(100, "down");
+//
+//        enma.liftSlideAuto(100, "up");
+//        enma.liftSlideAuto(100, "down");
 
         if (opModeIsActive()) {
+            enma.turnDegrees(90, "clockwise");
+            enma.moveRobotwEncoders("forward", 24, 0.5);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
