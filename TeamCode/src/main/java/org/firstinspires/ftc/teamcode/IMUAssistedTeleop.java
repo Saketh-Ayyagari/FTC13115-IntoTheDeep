@@ -113,7 +113,7 @@ public class IMUAssistedTeleop extends OpMode{
         if(state.equals("lock")){
             turn = PIDControl(SETPOINT, heading);
         }
-        drivetrain.powerMotors(drive, turn, strafe);
+        drivetrain.powerChassisMotors(drive, turn, strafe);
 
 
         //drivetrain.powerMotors(drive, turn, strafe);

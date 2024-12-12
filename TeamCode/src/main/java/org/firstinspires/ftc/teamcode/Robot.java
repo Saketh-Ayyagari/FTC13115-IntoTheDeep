@@ -119,7 +119,7 @@ public class Robot{
         frontLeft.setPower(0);
     }
     // given parameters for drive, rotation, and strafe power, send power to the motors
-    public void powerMotors(double drive, double turn, double strafe){
+    public void powerChassisMotors(double drive, double turn, double strafe){
         // calculates left and right side power after applying driving and turning
         double leftPower = Range.clip(drive - turn, -MAX_POWER, MAX_POWER);
         double rightPower = Range.clip(drive + turn, -MAX_POWER, MAX_POWER);
@@ -213,7 +213,13 @@ public class Robot{
         frontRight.setPower(rightPower);
         backRight.setPower(rightPower);
 
-
+        // Wait until the motors reach the target position
+        while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
+            telemetry.addData("frontLeft", frontLeft.getCurrentPosition());
+            telemetry.addData("backLeft", backLeft.getCurrentPosition());
+            telemetry.addData("frontRight", frontRight.getCurrentPosition());
+            telemetry.addData("backRight", backRight.getCurrentPosition());
+        }
     }
     public void turnDegrees(double targetDegrees, String dir) {
         // Set the motor to run using encoders

@@ -24,7 +24,7 @@ public class NoIMUTeleop extends OpMode
     private ElapsedTime runtime = new ElapsedTime();
 
     private final double MAX_POWER = 0.7;
-    /*git 
+    /*git
      * Code to run ONCE when the driver hits INIT
      */
     private Robot drivetrain = new Robot(MAX_POWER);
@@ -52,7 +52,7 @@ public class NoIMUTeleop extends OpMode
         double strafe = gamepad1.left_stick_x; // turning clockwise or counterclockwise
         double lift = gamepad1.left_trigger - gamepad1.right_trigger; // lifting the slide
 
-        drivetrain.powerMotors(drive, turn, strafe); // sends individual powers to the motors
+        drivetrain.powerChassisMotors(drive, turn, strafe); // sends individual powers to the motors
         drivetrain.liftSlide(lift);
 
         if (gamepad1.right_bumper){
