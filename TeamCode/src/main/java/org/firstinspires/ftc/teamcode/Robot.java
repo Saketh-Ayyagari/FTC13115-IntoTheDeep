@@ -120,19 +120,23 @@ public class Robot{
     }
     // given parameters for drive, rotation, and strafe power, send power to the motors
     public void powerChassisMotors(double drive, double turn, double strafe){
-        // calculates left and right side power after applying driving and turning
-        double leftPower = Range.clip(drive - turn, -MAX_POWER, MAX_POWER);
-        double rightPower = Range.clip(drive + turn, -MAX_POWER, MAX_POWER);
+        // calculates power of individual motors given drive, turn, and strafe values.
+        double frontLeftPower, frontRightPower, backRightPower, backLeftPower;
 
-        /**
-          * Send calculated power after adding/subtracting strafing power to wheels
-          * strafing happens independently on each wheel
-          * Range.clip() clamps the power sent to each motor between -MAX_POWER and MAXPOWER
-         **/
-        frontLeft.setPower(Range.clip(leftPower-strafe, -MAX_POWER, MAX_POWER));
-        frontRight.setPower(Range.clip(rightPower+strafe, -MAX_POWER, MAX_POWER));
-        backLeft.setPower(Range.clip(leftPower+strafe, -MAX_POWER, MAX_POWER));
-        backRight.setPower(Range.clip(rightPower-strafe, -MAX_POWER, MAX_POWER));
+        frontLeftPower = drive - turn - strafe;
+        backLeftPower = drive - turn + strafe;
+        frontRightPower = drive + turn + strafe;
+        backRightPower = drive + turn - strafe;
+
+        /*
+         * Send calculated power to wheels
+         * strafing happens independently on each wheel
+         * Range.clip() clamps the power sent to each motor between -MAX_POWER and MAX_POWER
+         * */
+        frontLeft.setPower(Range.clip(frontLeftPower, -MAX_POWER, MAX_POWER));
+        frontRight.setPower(Range.clip(frontRightPower, -MAX_POWER, MAX_POWER));
+        backLeft.setPower(Range.clip(backLeftPower, -MAX_POWER, MAX_POWER));
+        backRight.setPower(Range.clip(backRightPower, -MAX_POWER, MAX_POWER));
     }
 
     /**
@@ -161,8 +165,10 @@ public class Robot{
 
         double target = inches * TICKS_PER_IN;; // may have to find a way to convert from inches to ticks
 
-        double leftPower = speed;
-        double rightPower = speed;
+        double frontLeftPower = speed;
+        double backLeftPower = speed;
+        double frontRightPower = speed;
+        double backRightPower = speed;
 
         // different scenarios based on direction specified
         switch(direction){
@@ -178,8 +184,10 @@ public class Robot{
                 frontRight.setTargetPosition(-(int) target);
                 backRight.setTargetPosition(-(int) target);
 
-                leftPower *= -1;
-                rightPower *= -1;
+                frontLeftPower *= -1;
+                backLeftPower *= -1;
+                frontRightPower *= -1;
+                backRightPower *= -1;
 
                 break;
             case "counterclockwise":
@@ -188,7 +196,9 @@ public class Robot{
                 frontRight.setTargetPosition((int)target);
                 backRight.setTargetPosition((int)target);
                 
-                leftPower *= -1;
+                frontLeftPower *= -1;
+                backLeftPower *= -1;
+
                 break;
             case "clockwise":
                 frontLeft.setTargetPosition((int)target);
@@ -196,7 +206,9 @@ public class Robot{
                 frontRight.setTargetPosition(-(int)target);
                 backRight.setTargetPosition(-(int)target);
                 
-                rightPower *= -1;
+                frontRightPower *= -1;
+                backRightPower *= -1;
+
                 break;
         }
 
@@ -208,10 +220,10 @@ public class Robot{
 
 
         // Set the motor power
-        frontLeft.setPower(leftPower);
-        backLeft.setPower(leftPower);
-        frontRight.setPower(rightPower);
-        backRight.setPower(rightPower);
+        frontLeft.setPower(frontLeftPower);
+        backLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
 
         // Wait until the motors reach the target position
         while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
