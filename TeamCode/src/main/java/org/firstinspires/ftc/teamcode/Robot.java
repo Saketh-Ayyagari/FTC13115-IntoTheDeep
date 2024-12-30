@@ -349,9 +349,5 @@ public class Robot{
         left.setPower(0);
         right.setPower(0);
     }
-    public void hi(){
-        left.setPower(1);
-    }
-
 }
 

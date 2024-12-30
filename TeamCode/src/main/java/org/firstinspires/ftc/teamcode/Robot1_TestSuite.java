@@ -31,13 +31,25 @@ public class Robot1_TestSuite extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-//
-//        enma.liftSlideAuto(100, "up");
-//        enma.liftSlideAuto(100, "down");
-
         if (opModeIsActive()) {
+            //enma.liftSlideAuto(31, "up");
+            //enma.liftSlideAuto(30, "down");
+
+            enma.roll_in();
+            sleep(1000);
+            enma.stop_intake();
+            enma.liftSlideAuto(31, "up");
+            enma.roll_out();
+            sleep(1000);
+            enma.stop_intake();
+            enma.liftSlideAuto(30, "down");
+
             enma.turnDegrees(90, "clockwise");
-            enma.moveRobotwEncoders("forward", 24, 0.5);
+            enma.moveRobotwEncoders("forward", 24, enma.MAX_POWER);
+
+            enma.turnDegrees(180, "counterclockwise");
+            enma.turnDegrees(90, "clockwise");
+            enma.moveRobotwEncoders("backward", 24, enma.MAX_POWER);
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
