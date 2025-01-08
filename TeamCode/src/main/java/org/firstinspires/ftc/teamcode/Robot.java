@@ -79,11 +79,11 @@ public class Robot{
         left = hardwareMp.get(CRServo.class, "left");
         right = hardwareMp.get(CRServo.class, "right");
 
-        //backRight.setDirection(DcMotor.Direction.REVERSE);
-        //frontRight.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
+        frontRight.setDirection(DcMotor.Direction.REVERSE);
 
-        backLeft.setDirection(DcMotor.Direction.REVERSE);
-        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        //backLeft.setDirection(DcMotor.Direction.REVERSE);
+        //frontLeft.setDirection(DcMotor.Direction.REVERSE);
         //slide.setDirection(DcMotor.Direction.REVERSE); // FIX -- 11/25; test if needed
 
         // setting the mode of each motor to run without encoders
@@ -170,36 +170,37 @@ public class Robot{
         // different scenarios based on direction specified
         switch(direction){
             case "forward":
-                frontLeft.setTargetPosition((int)target);
-                backLeft.setTargetPosition((int)target);
-                frontRight.setTargetPosition((int)target);
-                backRight.setTargetPosition((int)target);
-                break;
-            case "backward":
-                frontLeft.setTargetPosition(-(int) target);
-                backLeft.setTargetPosition(-(int) target);
-                frontRight.setTargetPosition(-(int) target);
-                backRight.setTargetPosition(-(int) target);
+                frontLeft.setTargetPosition(-(int)target);
+                backLeft.setTargetPosition(-(int)target);
+                frontRight.setTargetPosition(-(int)target);
+                backRight.setTargetPosition(-(int)target);
 
                 leftPower *= -1;
                 rightPower *= -1;
+                break;
+            case "backward":
+                frontLeft.setTargetPosition((int) target);
+                backLeft.setTargetPosition((int) target);
+                frontRight.setTargetPosition((int) target);
+                backRight.setTargetPosition((int) target);
+
 
                 break;
             case "left":
-                frontLeft.setTargetPosition(-(int)target);
-                backLeft.setTargetPosition((int)target);
-                frontRight.setTargetPosition((int)target);
-                backRight.setTargetPosition(-(int)target);
-                
-                leftPower *= -1;
-                break;
-            case "right":
                 frontLeft.setTargetPosition((int)target);
                 backLeft.setTargetPosition(-(int)target);
                 frontRight.setTargetPosition(-(int)target);
                 backRight.setTargetPosition((int)target);
-                
+
                 rightPower *= -1;
+                break;
+            case "right":
+                frontLeft.setTargetPosition(-(int)target);
+                backLeft.setTargetPosition((int)target);
+                frontRight.setTargetPosition((int)target);
+                backRight.setTargetPosition(-(int)target);
+
+                leftPower *= -1;
                 break;
         }
 
@@ -263,11 +264,11 @@ public class Robot{
         int rightTarget = targetPosition;
 
         if (dir.equals("clockwise")) {
-            rightPowerLevel *= -1;
-            rightTarget *= -1;
-        } else if (dir.equals("counterclockwise")) {
             leftPowerLevel *= -1;
             leftTarget *= -1;
+        } else if (dir.equals("counterclockwise")) {
+            rightPowerLevel *= -1;
+            rightTarget *= -1;
         }
         frontLeft.setTargetPosition(leftTarget);
         frontRight.setTargetPosition(rightTarget);

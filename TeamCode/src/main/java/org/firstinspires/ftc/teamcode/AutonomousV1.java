@@ -13,7 +13,7 @@ public class AutonomousV1 extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private final Robot robot = new Robot(0.8);
+    private final Robot robot = new Robot(0.5);
 
     @Override
     public void runOpMode() {
@@ -28,27 +28,27 @@ public class AutonomousV1 extends LinearOpMode {
 
         //Armless Autonomous Strategy show in Armless Auto Strat 1 Corrected.pdf https://drive.google.com/drive/u/1/folders/1flgkWB1yZEToVUaXiTsMUBPjUwb2EzVf
         //start robot facing the outside on second tile line
-        robot.moveRobotwEncoders("right", 10, robot.MAX_POWER);
+        robot.moveRobotwEncoders("right", 29, robot.MAX_POWER);
         //robot.turnDegrees("90", );
 
         //push first sample
-        robot.moveRobotwEncoders("backward", 60, robot.MAX_POWER);
-        robot.moveRobotwEncoders("right", 15, robot.MAX_POWER);
-        robot.moveRobotwEncoders("forward", 58, robot.MAX_POWER);
+        robot.moveRobotwEncoders("backward", 58, robot.MAX_POWER);
+        robot.moveRobotwEncoders("right", 9, robot.MAX_POWER);
+        robot.moveRobotwEncoders("forward", 56, robot.MAX_POWER);
 
         //push second sample
-        robot.moveRobotwEncoders("backward", 58, robot.MAX_POWER);
-        robot.moveRobotwEncoders("right", 10, robot.MAX_POWER);
-        robot.moveRobotwEncoders("forward", 58, robot.MAX_POWER);
+        robot.moveRobotwEncoders("backward", 54, robot.MAX_POWER);
+        robot.moveRobotwEncoders("right", 16, robot.MAX_POWER);
+        robot.moveRobotwEncoders("forward", 56, robot.MAX_POWER);
 
         //push third sample
-        robot.moveRobotwEncoders("backward", 58, robot.MAX_POWER);
-        robot.moveRobotwEncoders("right", 10, robot.MAX_POWER);
-        robot.moveRobotwEncoders("forward", 58, robot.MAX_POWER);
+        robot.moveRobotwEncoders("backward", 52, robot.MAX_POWER);
+        robot.moveRobotwEncoders("right", 12, robot.MAX_POWER);
+        robot.moveRobotwEncoders("forward", 56, robot.MAX_POWER);
 
         //park in ascent zone
-        robot.moveRobotwEncoders("backward", 60, robot.MAX_POWER);
-        robot.moveRobotwEncoders("left", 60, robot.MAX_POWER);
+        robot.moveRobotwEncoders("backward", 58, robot.MAX_POWER);
+        robot.moveRobotwEncoders("left", 30, robot.MAX_POWER);
 
     }
 }
