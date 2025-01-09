@@ -59,10 +59,10 @@ public class IMUAutonomousRelativeTurning extends LinearOpMode {
         while (Math.abs(getHeading()) < Math.abs(relativeDegrees)) {
             // Turn left or right based on the sign of the heading value
             if (relativeDegrees > 0) {
-                drivetrain.powerMotors(0, MAX_POWER, 0); // Turn right
+                drivetrain.powerChassisMotors(0, MAX_POWER, 0); // Turn right
             }
             else{
-                drivetrain.powerMotors(0, -MAX_POWER, 0);
+                drivetrain.powerChassisMotors(0, -MAX_POWER, 0);
             }
 
             telemetry.addData("Current Heading", getHeading());

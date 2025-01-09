@@ -79,8 +79,11 @@ public class Robot{
         left = hardwareMp.get(CRServo.class, "left");
         right = hardwareMp.get(CRServo.class, "right");
 
-        backRight.setDirection(DcMotor.Direction.REVERSE);
-        frontRight.setDirection(DcMotor.Direction.REVERSE);
+        //backRight.setDirection(DcMotor.Direction.REVERSE);
+        //frontRight.setDirection(DcMotor.Direction.REVERSE);
+
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
         //slide.setDirection(DcMotor.Direction.REVERSE); // FIX -- 11/25; test if needed
 
         // setting the mode of each motor to run without encoders
@@ -190,21 +193,21 @@ public class Robot{
                 backRightPower *= -1;
 
                 break;
-            case "counterclockwise":
+            case "left":
                 frontLeft.setTargetPosition(-(int)target);
-                backLeft.setTargetPosition(-(int)target);
+                backLeft.setTargetPosition((int)target);
                 frontRight.setTargetPosition((int)target);
-                backRight.setTargetPosition((int)target);
+                backRight.setTargetPosition(-(int)target);
                 
                 frontLeftPower *= -1;
                 backLeftPower *= -1;
 
                 break;
-            case "clockwise":
+            case "right":
                 frontLeft.setTargetPosition((int)target);
-                backLeft.setTargetPosition((int)target);
+                backLeft.setTargetPosition(-(int)target);
                 frontRight.setTargetPosition(-(int)target);
-                backRight.setTargetPosition(-(int)target);
+                backRight.setTargetPosition((int)target);
                 
                 frontRightPower *= -1;
                 backRightPower *= -1;
@@ -227,11 +230,12 @@ public class Robot{
 
         // Wait until the motors reach the target position
         while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
-            telemetry.addData("frontLeft", frontLeft.getCurrentPosition());
-            telemetry.addData("backLeft", backLeft.getCurrentPosition());
-            telemetry.addData("frontRight", frontRight.getCurrentPosition());
-            telemetry.addData("backRight", backRight.getCurrentPosition());
+
         }
+        backRight.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        frontLeft.setPower(0);
     }
     public void turnDegrees(double targetDegrees, String dir) {
         // Set the motor to run using encoders
@@ -253,7 +257,7 @@ public class Robot{
         //we get degrees so convert to radians and multiply by our radius
 
         double radius = 10.5; // distance from center of the robot to one of the wheels in inches
-        double radians = Math.toRadians(targetDegrees);
+        double radians = Math.toRadians(targetDegrees*1.2);
         double target_inches = radius * radians; //arc length = inches
 
         /**
@@ -296,13 +300,13 @@ public class Robot{
 
 //
 //        // Wait until the motor reaches the target position
-//        while (frontLeft.isBusy()) {
+       while (frontLeft.isBusy()) {
 //            telemetry.addData("Left Front Current Position", frontLeft.getCurrentPosition());
 //            telemetry.addData("Left Back Current Position", backLeft.getCurrentPosition());
 //            telemetry.addData("Right Front Current Position", frontRight.getCurrentPosition());
 //            telemetry.addData("Right Back Current Position", backRight.getCurrentPosition());
 //            telemetry.update();
-//        }
+        }
 
     }
     // lifts extender to change orientation of the sample grip
@@ -361,9 +365,5 @@ public class Robot{
         left.setPower(0);
         right.setPower(0);
     }
-    public void hi(){
-        left.setPower(1);
-    }
-
 }
 
