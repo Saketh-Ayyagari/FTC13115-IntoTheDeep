@@ -48,18 +48,18 @@ public class NoIMUTeleop extends OpMode
     public void loop() {
         // TURNING TEMPORARILY DISABLED -- 11/25
         double drive = gamepad1.left_stick_y; // moving forward or backward
-        double turn = gamepad1.right_stick_x; // strafing left or right
-        double strafe = gamepad1.left_stick_x; // turning clockwise or counterclockwise
+        double turn = gamepad1.left_stick_x; // strafing left or right
+        double strafe = gamepad1.right_stick_x; // turning clockwise or counterclockwise
         double lift = gamepad1.left_trigger - gamepad1.right_trigger; // lifting the slide
 
         drivetrain.powerChassisMotors(drive, turn, strafe); // sends individual powers to the motors
         drivetrain.liftSlide(lift);
 
         if (gamepad1.right_bumper){
-            drivetrain.roll_in();
+            drivetrain.close();
         }
-        if (gamepad1.left_bumper){
-            drivetrain.roll_out();
+        /*if (gamepad1.left_bumper){
+            drivetrain.open();
         }
         if (gamepad1.a){
             drivetrain.liftServo(0.3);
@@ -69,10 +69,7 @@ public class NoIMUTeleop extends OpMode
         }
         if (gamepad1.x){
             drivetrain.liftServo(0.5);
-        }
-        else{
-            drivetrain.stop_intake();
-        }
+        }*/
 
     }
 }

@@ -38,7 +38,7 @@ public class AutonomousV1 extends LinearOpMode {
 
         //push second sample
         robot.moveRobotwEncoders("backward", 54, robot.MAX_POWER);
-        robot.moveRobotwEncoders("right", 16, robot.MAX_POWER);
+        robot.moveRobotwEncoders("right", 14, robot.MAX_POWER);
         robot.moveRobotwEncoders("forward", 56, robot.MAX_POWER);
 
         //push third sample
@@ -48,7 +48,7 @@ public class AutonomousV1 extends LinearOpMode {
 
         //park in ascent zone
         robot.moveRobotwEncoders("backward", 58, robot.MAX_POWER);
-        robot.moveRobotwEncoders("left", 30, robot.MAX_POWER);
+        robot.moveRobotwEncoders("left", 40, robot.MAX_POWER);
 
     }
 }
