@@ -173,43 +173,48 @@ public class Robot{
 
         double target = inches * TICKS_PER_IN;; // may have to find a way to convert from inches to ticks
 
-        double leftPower = speed;
-        double rightPower = speed;
+        double frontLeftPower = speed;
+        double backLeftPower = speed;
+        double frontRightPower = speed;
+        double backRightPower = speed;
 
+
+        // different scenarios based on direction specified
+        int frontLeftTarget = (int)target;
+        int backLeftTarget = (int)target;
+
+        int frontRightTarget = (int)target;
+        int backRightTarget = (int)target;
         // different scenarios based on direction specified
         switch(direction){
             case "forward":
-                frontLeft.setTargetPosition(-(int)target);
-                backLeft.setTargetPosition(-(int)target);
-                frontRight.setTargetPosition(-(int)target);
-                backRight.setTargetPosition(-(int)target);
+                frontLeftTarget *= -1;
+                backLeftTarget *= -1;
+                frontRightTarget *= -1;
+                backRightTarget *= -1;
 
-                leftPower *= -1;
-                rightPower *= -1;
+                frontLeftPower *= -1;
+                backLeftPower *= -1;
+                frontRightPower *= -1;
+                backRightPower *= -1;
                 break;
             case "backward":
-                frontLeft.setTargetPosition((int) target);
-                backLeft.setTargetPosition((int) target);
-                frontRight.setTargetPosition((int) target);
-                backRight.setTargetPosition((int) target);
-
 
                 break;
             case "left":
-                frontLeft.setTargetPosition((int)target);
-                backLeft.setTargetPosition(-(int)target);
-                frontRight.setTargetPosition(-(int)target);
-                backRight.setTargetPosition((int)target);
+                backLeftTarget *= -1;//.setTargetPosition(-(int)target);
+                frontRightTarget *= -1; //.setTargetPosition(-(int)target);
 
-                rightPower *= -1;
+
+                backLeftPower *= -1;
+                backRightPower *= -1;
                 break;
             case "right":
-                frontLeft.setTargetPosition(-(int)target);
-                backLeft.setTargetPosition((int)target);
-                frontRight.setTargetPosition((int)target);
-                backRight.setTargetPosition(-(int)target);
+                frontLeftTarget *= -1;//.setTargetPosition(-(int)target);
+                backRightTarget *= -1;//.setTargetPosition(-(int)target);
 
-                leftPower *= -1;
+                frontLeftPower *= -1;
+                backLeftPower *= -1;
                 break;
         }
 
@@ -221,10 +226,10 @@ public class Robot{
 
 
         // Set the motor power
-        frontLeft.setPower(leftPower);
-        backLeft.setPower(leftPower);
-        frontRight.setPower(rightPower);
-        backRight.setPower(rightPower);
+        frontLeft.setPower(frontLeftPower);
+        backLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
 
         // Wait until the motors reach the target position
         while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
@@ -310,7 +315,7 @@ public class Robot{
         frontLeft.setPower(frontLeftPower);
         backLeft.setPower(backLeftPower);
         frontRight.setPower(frontRightPower);
-        backRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
 /*
         int frontLeftError = frontLeftTarget - frontLeft.getCurrentPosition();
         int backLeftError = backLeftTarget - backLeft.getCurrentPosition();
@@ -325,6 +330,8 @@ public class Robot{
             frontRightPower = pid(frontRightTarget, frontRight.getCurrentPosition());
             backRightPower = pid(backRightTarget, backRight.getCurrentPosition());
 
+
+            //add previous error to use derivative term
 
             frontLeft.setPower(frontLeftPower);
             backLeft.setPower(backLeftPower);
