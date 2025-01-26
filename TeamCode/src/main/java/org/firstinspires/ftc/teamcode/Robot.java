@@ -49,13 +49,16 @@ public class Robot{
     // motors for slide and intake control
     public DcMotor slide;
     public Servo extend;
-    public CRServo left, right;
+    public Servo claw;
 
     // maximum power robot can drive
     public double MAX_POWER;
 
     private Telemetry telemetry; // for FTC dashboard--will integrate later
 
+    // variables for claw positions
+    private final double open_pos = 0.45;
+    private final double closed_pos = 0.88;
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
@@ -76,8 +79,7 @@ public class Robot{
 
         slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
         extend = hardwareMp.get(Servo.class, "extend");
-        left = hardwareMp.get(CRServo.class, "left");
-        right = hardwareMp.get(CRServo.class, "right");
+        claw = hardwareMp.get(Servo.class, "claw");
 
         //backRight.setDirection(DcMotor.Direction.REVERSE);
         //frontRight.setDirection(DcMotor.Direction.REVERSE);
@@ -230,7 +232,7 @@ public class Robot{
 
         // Wait until the motors reach the target position
         while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
-
+            //telemetry.update();
         }
         backRight.setPower(0);
         backLeft.setPower(0);
@@ -305,7 +307,7 @@ public class Robot{
 //            telemetry.addData("Left Back Current Position", backLeft.getCurrentPosition());
 //            telemetry.addData("Right Front Current Position", frontRight.getCurrentPosition());
 //            telemetry.addData("Right Back Current Position", backRight.getCurrentPosition());
-//            telemetry.update();
+            telemetry.update();
         }
 
     }
@@ -323,7 +325,7 @@ public class Robot{
             slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             int setpoint = slide.getCurrentPosition();
             slide.setTargetPosition(setpoint);
-            slide.setPower(0.002); // tune if needed
+            slide.setPower(-0.002); // tune if needed
         }
     }
     // rotates pulley a certain number of rotations to lift the slide
@@ -350,20 +352,12 @@ public class Robot{
         slide.setPower(power);
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
-    // continuously rolls the active intake inward
-    public void roll_in(){
-        left.setPower(-1);
-        right.setPower(1);
+    public void open(){
+        claw.setPosition(open_pos);
     }
-    // lets go of the sample
-    public void roll_out(){
-        left.setPower(1);
-        right.setPower(-1);
+    public void close(){
+        claw.setPosition(closed_pos);
     }
-    // stops intake motors entirely
-    public void stop_intake(){
-        left.setPower(0);
-        right.setPower(0);
-    }
+    // accesser methods--for debugging purposes
 }
 

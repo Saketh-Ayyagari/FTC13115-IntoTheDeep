@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@Autonomous(name="Robot1_TestSuite", group="Linear OpMode")
+@Autonomous(name="Autonomous V2", group="Linear OpMode")
 //@Disabled
 public class AutonomousV2 extends LinearOpMode {
 
@@ -27,7 +27,6 @@ public class AutonomousV2 extends LinearOpMode {
         runtime.reset();
 
         //Autonomous Strategy show in Armless Auto Strat 1 Corrected.pdf https://drive.google.com/drive/u/1/folders/1flgkWB1yZEToVUaXiTsMUBPjUwb2EzVf
-
 
     }
 }
