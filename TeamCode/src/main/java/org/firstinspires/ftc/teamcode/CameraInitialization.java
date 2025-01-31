@@ -28,22 +28,20 @@ import org.openftc.easyopencv.OpenCvWebcam;
 @Autonomous(name="CameraInitialization", group="Iterative OpMode")
 
 public class CameraInitialization extends OpMode {
-    private DcMotor frontLeft;
-    private DcMotor backLeft;
-    private DcMotor frontRight;
-    private DcMotor backRight;
-
+    private Robot robot = new Robot(0.5);
     // camera variables
     private static final int CAMERA_WIDTH = 640;
     private static final int CAMERA_HEIGHT = 480;
 
     private int cameraMonitorViewId;
-    private OpenCvCamera camera;
+    private OpenCvWebcam camera;
     private WebcamName webcamName;
     private testPipeline pipeline = new testPipeline();
 
     public void init() {
-        cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "cameraMonitorViewId", "id",
+                hardwareMap.appContext.getPackageName());
         webcamName = hardwareMap.get(WebcamName.class, "webcam13115");
         camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
 
@@ -58,13 +56,19 @@ public class CameraInitialization extends OpMode {
 
             @Override
             public void onError(int errorCode) {
-
+                telemetry.addData("Camera error. Please try again!", null);
             }
         });
+        telemetry.addData("Contour Center: ", pipeline.get_contour_center());
+        telemetry.addData("Contour Area: ", pipeline.get_contour_area());
+        telemetry.update();
     }
     @Override
-    public void loop(){
-       //telemetry.addData("Status", "Camera running for: " + runtime.toString());
+    public void loop() {
+//        camera.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
+
+        telemetry.addData("Contour Center: ", pipeline.get_contour_center());
+        telemetry.addData("Contour Area: ", pipeline.get_contour_area());
         telemetry.update();
     }
 }
