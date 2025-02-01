@@ -47,9 +47,9 @@ public class Robot{
     public DcMotor backRight;
 
     // motors for slide and intake control
-    public DcMotor slide;
-    public Servo extend;
-    public Servo claw;
+//    public DcMotor slide;
+//    public Servo extend;
+//    public Servo claw;
 
     // maximum power robot can drive
     public double MAX_POWER;
@@ -77,9 +77,9 @@ public class Robot{
         backLeft = hardwareMp.get(DcMotor.class, "backLeft"); //port 1
         frontLeft = hardwareMp.get(DcMotor.class, "frontLeft"); //port 0
 
-        slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
-        extend = hardwareMp.get(Servo.class, "extend");
-        claw = hardwareMp.get(Servo.class, "claw");
+//        slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
+//        extend = hardwareMp.get(Servo.class, "extend");
+//        claw = hardwareMp.get(Servo.class, "claw");
 
         //backRight.setDirection(DcMotor.Direction.REVERSE);
         //frontRight.setDirection(DcMotor.Direction.REVERSE);
@@ -93,14 +93,14 @@ public class Robot{
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //start at 0 power
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     /*
     * Positive power = rotate counterclockwise (causes heading to become larger)
@@ -312,52 +312,52 @@ public class Robot{
 
     }
     // lifts extender to change orientation of the sample grip
-    public void liftServo(double position){
-        extend.setPosition(position);
-    }
-    // sends power directly to slide for teleop
-    public void liftSlide(double power){
-        if (power != 0){
-            slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            slide.setPower(power);
-        }
-        else{
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            int setpoint = slide.getCurrentPosition();
-            slide.setTargetPosition(setpoint);
-            slide.setPower(-0.002); // tune if needed
-        }
-    }
-    // rotates pulley a certain number of rotations to lift the slide
-    // two cases: up and down
-    public void liftSlideAuto(double inches, String dir){
-        double mm = inches * 25.4; // converting inches to mm
-        final double TICKS_PER_REV = 2786.2; // ticks per revolution
-        final double MM_PER_ROTATION = 120; // for every 1 rotation, the belt moves 120 MM
-
-        int target = (int)(((2786.2)/(38.2*Math.PI)) * mm); //
-
-        double power = MAX_POWER;
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        if (dir.equals("down")){
-            //go down target ticks
-            //neg power neg target
-            power *= -1;
-            target *= -1;
-        }
-        slide.setTargetPosition(target);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        slide.setPower(power);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-    public void open(){
-        claw.setPosition(open_pos);
-    }
-    public void close(){
-        claw.setPosition(closed_pos);
-    }
+//    public void liftServo(double position){
+//        extend.setPosition(position);
+//    }
+//    // sends power directly to slide for teleop
+//    public void liftSlide(double power){
+//        if (power != 0){
+//            slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//            slide.setPower(power);
+//        }
+//        else{
+//            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//            int setpoint = slide.getCurrentPosition();
+//            slide.setTargetPosition(setpoint);
+//            slide.setPower(-0.002); // tune if needed
+//        }
+//    }
+//    // rotates pulley a certain number of rotations to lift the slide
+//    // two cases: up and down
+//    public void liftSlideAuto(double inches, String dir){
+//        double mm = inches * 25.4; // converting inches to mm
+//        final double TICKS_PER_REV = 2786.2; // ticks per revolution
+//        final double MM_PER_ROTATION = 120; // for every 1 rotation, the belt moves 120 MM
+//
+//        int target = (int)(((2786.2)/(38.2*Math.PI)) * mm); //
+//
+//        double power = MAX_POWER;
+//        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//
+//        if (dir.equals("down")){
+//            //go down target ticks
+//            //neg power neg target
+//            power *= -1;
+//            target *= -1;
+//        }
+//        slide.setTargetPosition(target);
+//        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        slide.setPower(power);
+//        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//    }
+//    public void open(){
+//        claw.setPosition(open_pos);
+//    }
+//    public void close(){
+//        claw.setPosition(closed_pos);
+//    }
     // accesser methods--for debugging purposes
 }
 

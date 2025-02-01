@@ -84,7 +84,7 @@ public class NoIMUTeleop extends OpMode
         // robot-relative driving settings--COMMENT ABOVE 3 LINES AND COMMENT OUT THESE LINES FOR
         //   TESTING!!
         drivetrain.powerChassisMotors(drive, turn, strafe);
-        drivetrain.liftSlide(lift);
+        /*drivetrain.liftSlide(lift);
 
         if (gamepad1.left_bumper){
             drivetrain.close();
@@ -100,7 +100,7 @@ public class NoIMUTeleop extends OpMode
         }
         if (gamepad1.b){
             drivetrain.liftServo(0.85);
-        }
+        }*/
 
     }
 }
