@@ -22,6 +22,17 @@ public class testPipeline extends OpenCvPipeline {
     // NOTE: "Scalar" color channels are RGB
     private Scalar low_hsv_RED = new Scalar(0, 125, 75);
     private Scalar high_hsv_RED = new Scalar(10, 255, 255);
+
+    private Scalar low_hsv_BLUE = new Scalar(100, 125, 75);
+    private Scalar high_hsv_BLUE = new Scalar(115, 255, 255);
+
+    private Scalar low_hsv_YELLOW = new Scalar(23, 125, 75);
+    private Scalar high_hsv_YELLOW = new Scalar(34, 255, 255);
+
+
+
+    private Scalar low_hsv = low_hsv_RED;
+    private Scalar high_hsv = high_hsv_RED;
     private final Scalar CONTOUR_COLOR = new Scalar(0, 0, 125);
     // Mat variables used for find_contours() method
     private Mat hsv = new Mat();
@@ -35,7 +46,7 @@ public class testPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         // finds contours
-        ArrayList<MatOfPoint> contour_list = find_contours(input, low_hsv_RED, high_hsv_RED, 45);
+        ArrayList<MatOfPoint> contour_list = find_contours(input, low_hsv, high_hsv, 45);
         input.copyTo(output);
 
         // finding max contour
@@ -110,5 +121,19 @@ public class testPipeline extends OpenCvPipeline {
     }
     public double get_contour_area(){
         return this.contour_area;
+    }
+
+    public void track_blue(){
+        low_hsv = low_hsv_BLUE;
+        high_hsv = high_hsv_BLUE;
+    }
+    public void track_red(){
+        low_hsv = low_hsv_RED;
+        high_hsv = high_hsv_RED;
+    }
+
+    public void track_yellow(){
+        low_hsv = low_hsv_YELLOW;
+        high_hsv = high_hsv_YELLOW;
     }
 }
