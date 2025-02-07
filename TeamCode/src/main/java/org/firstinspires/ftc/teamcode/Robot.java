@@ -47,9 +47,9 @@ public class Robot{
     public DcMotor backRight;
 
     // motors for slide and intake control
-//    public DcMotor slide;
-//    public Servo extend;
-//    public Servo claw;
+    public DcMotor slide;
+    public Servo extend;
+    public Servo left, right;
 
     // maximum power robot can drive
     public double MAX_POWER;
@@ -57,8 +57,8 @@ public class Robot{
     private Telemetry telemetry; // for FTC dashboard--will integrate later
 
     // variables for claw positions
-    private final double open_pos = 0.45;
-    private final double closed_pos = 0.88;
+    private final double open_pos = 0;
+    private final double closed_pos = 0.4;
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
@@ -77,16 +77,13 @@ public class Robot{
         backLeft = hardwareMp.get(DcMotor.class, "backLeft"); //port 1
         frontLeft = hardwareMp.get(DcMotor.class, "frontLeft"); //port 0
 
-//        slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
-//        extend = hardwareMp.get(Servo.class, "extend");
-//        claw = hardwareMp.get(Servo.class, "claw");
-
-        //backRight.setDirection(DcMotor.Direction.REVERSE);
-        //frontRight.setDirection(DcMotor.Direction.REVERSE);
+        slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
+        extend = hardwareMp.get(Servo.class, "extend");
+        left = hardwareMp.get(Servo.class, "left");
+        right = hardwareMp.get(Servo.class, "right");
 
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
-        //slide.setDirection(DcMotor.Direction.REVERSE); // FIX -- 11/25; test if needed
 
         // setting the mode of each motor to run without encoders
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -128,10 +125,10 @@ public class Robot{
         // calculates power of individual motors given drive, turn, and strafe values.
         double frontLeftPower, frontRightPower, backRightPower, backLeftPower;
 
-        frontLeftPower = drive - turn - strafe;
-        backLeftPower = drive - turn + strafe;
-        frontRightPower = drive + turn + strafe;
-        backRightPower = drive + turn - strafe;
+        frontLeftPower = drive + turn - strafe;
+        backLeftPower = drive + turn + strafe;
+        frontRightPower = drive - turn + strafe;
+        backRightPower = drive - turn - strafe;
 
         /*
          * Send calculated power to wheels
@@ -311,53 +308,58 @@ public class Robot{
         }
 
     }
-    // lifts extender to change orientation of the sample grip
-//    public void liftServo(double position){
-//        extend.setPosition(position);
-//    }
-//    // sends power directly to slide for teleop
-//    public void liftSlide(double power){
-//        if (power != 0){
-//            slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//            slide.setPower(power);
-//        }
+     // lifts extender to change orientation of the sample grip
+    public void liftServo(double position){
+        extend.setPosition(position);
+    }
+    // sends power directly to slide for teleop
+    public void liftSlide(double power){
+        if (power != 0){
+            slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            slide.setPower(power);
+        }
+        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slide.setPower(power);
 //        else{
 //            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //            int setpoint = slide.getCurrentPosition();
 //            slide.setTargetPosition(setpoint);
-//            slide.setPower(-0.002); // tune if needed
+//            slide.setPower(-0.001); // tune if needed
 //        }
-//    }
-//    // rotates pulley a certain number of rotations to lift the slide
-//    // two cases: up and down
-//    public void liftSlideAuto(double inches, String dir){
-//        double mm = inches * 25.4; // converting inches to mm
-//        final double TICKS_PER_REV = 2786.2; // ticks per revolution
-//        final double MM_PER_ROTATION = 120; // for every 1 rotation, the belt moves 120 MM
-//
-//        int target = (int)(((2786.2)/(38.2*Math.PI)) * mm); //
-//
-//        double power = MAX_POWER;
-//        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//
-//        if (dir.equals("down")){
-//            //go down target ticks
-//            //neg power neg target
-//            power *= -1;
-//            target *= -1;
-//        }
-//        slide.setTargetPosition(target);
-//        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//
-//        slide.setPower(power);
-//        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//    }
-//    public void open(){
-//        claw.setPosition(open_pos);
-//    }
-//    public void close(){
-//        claw.setPosition(closed_pos);
-//    }
+    }
+    // rotates pulley a certain number of rotations to lift the slide
+    // two cases: up and down
+    public void liftSlideAuto(double inches, String dir){
+        double mm = inches * 25.4; // converting inches to mm
+        final double TICKS_PER_REV = 2786.2; // ticks per revolution
+        final double MM_PER_ROTATION = 120; // for every 1 rotation, the belt moves 120 MM
+
+        int target = (int)(((2786.2)/(38.2*Math.PI)) * mm); //
+
+        double power = MAX_POWER;
+        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (dir.equals("down")){
+            //go down target ticks
+            //neg power neg target
+            power *= -1;
+            target *= -1;
+        }
+        slide.setTargetPosition(target);
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        slide.setPower(power);
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+    // SERVO RANGE FROM 0 - 1
+    public void open(){
+        left.setPosition(open_pos);
+        right.setPosition(closed_pos);
+    }
+    public void close(){
+        left.setPosition(closed_pos);
+        right.setPosition(open_pos);
+    }
     // accesser methods--for debugging purposes
 }
 
