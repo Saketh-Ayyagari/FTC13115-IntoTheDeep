@@ -28,10 +28,8 @@ public class NoIMUTeleop extends OpMode
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
 
-    private final double MAX_POWER = 0.6;
+    private final double MAX_POWER = 0.3;
     private double power = 0;
-    private final double open_pos = 0.45;
-    private final double closed_pos = 0.88;
 
     // robot bits
     private Robot drivetrain = new Robot(MAX_POWER);
@@ -71,10 +69,14 @@ public class NoIMUTeleop extends OpMode
         // gets joystick values for translational motion (drive and strafe) and rotational
         // motion
         double drive = -gamepad1.left_stick_y; // moving forward or backward
-        double turn = -gamepad1.right_stick_x; // strafing left or right
+        double turn = gamepad1.right_stick_x; // strafing left or right
         double strafe = -gamepad1.left_stick_x; // turning clockwise or counterclockwise
         double lift = gamepad1.left_trigger - gamepad1.right_trigger; // lifting the slide
 
+        telemetry.addData("drive: ", drive);
+        telemetry.addData("turn: ", turn);
+        telemetry.addData("strafe: ", strafe);
+        telemetry.addLine();
         // field-relative driving instead of robot-relative driving
 
 //        double x_rotated = drive * Math.cos(angle) - strafe * Math.sin(angle);
@@ -84,7 +86,7 @@ public class NoIMUTeleop extends OpMode
         // robot-relative driving settings--COMMENT ABOVE 3 LINES AND COMMENT OUT THESE LINES FOR
         //   TESTING!!
         drivetrain.powerChassisMotors(drive, turn, strafe);
-        /*drivetrain.liftSlide(lift);
+        drivetrain.liftSlide(lift);
 
         if (gamepad1.left_bumper){
             drivetrain.close();
@@ -93,14 +95,23 @@ public class NoIMUTeleop extends OpMode
             drivetrain.open();
         }
         if (gamepad1.x){
-            drivetrain.liftServo(0.4);
+            drivetrain.liftServo(-0.2);
         }
         if (gamepad1.a){
-            drivetrain.liftServo(0.5);
+            drivetrain.liftServo(0);
         }
         if (gamepad1.b){
-            drivetrain.liftServo(0.85);
-        }*/
-
+            drivetrain.liftServo(0.33);
+        }
+        telemetry.addData("frontLeft Power: ", drivetrain.frontLeft.getPower());
+        telemetry.addData("backLeft Power: ", drivetrain.backLeft.getPower());
+        telemetry.addData("frontRight Power: ", drivetrain.frontRight.getPower());
+        telemetry.addData("backRight Power: ", drivetrain.backRight.getPower());
+        telemetry.addLine();
+        telemetry.addData("Extend Pos: ", drivetrain.extend.getPosition());
+        telemetry.addData("Left Pos: ", drivetrain.left.getPosition());
+        telemetry.addData("Right Pos: ", drivetrain.right.getPosition());
+        telemetry.addData("Runtime", runtime.seconds());
+        telemetry.update();
     }
 }
