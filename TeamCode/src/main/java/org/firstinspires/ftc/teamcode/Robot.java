@@ -58,7 +58,7 @@ public class Robot{
 
     // variables for claw positions
     private final double open_pos = 0;
-    private final double closed_pos = 0.4;
+    private final double closed_pos = 0.45;
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
