@@ -12,8 +12,14 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.opencv.core.Point;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 /*
  * Saketh Ayyagari
@@ -25,19 +31,53 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 //@Disabled
 public class NoIMUTeleop extends OpMode
 {
-    // Declare OpMode members.
+    // Standard member variables
     private ElapsedTime runtime = new ElapsedTime();
-
-    private final double MAX_POWER = 0.3;
-    private double power = 0;
-
-    // robot bits
+    private final double MAX_POWER = 0.5;
+    // robot classes/components
     private Robot drivetrain = new Robot(MAX_POWER);
     private IMU.Parameters myIMUParameters;
     private IMU imu;
+    // camera variables: 480p resolution
+    private static final int CAMERA_WIDTH = 640;
+    private static final int CAMERA_HEIGHT = 480;
+    private int cameraMonitorViewId;
+    private OpenCvWebcam camera;
+    private testPipeline pipeline = new testPipeline();
+    // PID Values
+    private final double Kp = 0.003125;
+    private final double Ki = 0.0;
+    private final double Kd = 0.0;
+    private Double prevError = 0.0;
+    private double error_sum = 0;
+
+
+    private void initCamera(){
+        cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "cameraMonitorViewId", "id",
+                hardwareMap.appContext.getPackageName());
+        WebcamName webcamName = hardwareMap.get(WebcamName.class, "webcam13115");
+        camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
+
+        camera.setPipeline(pipeline);
+
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                //start streaming from here
+                camera.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
+            }
+            @Override
+            public void onError(int errorCode) {
+                telemetry.addData("Camera error. Please try again!", null);
+            }
+        });
+    }
     @Override
     public void init() {
+        initCamera();
         drivetrain.init(hardwareMap);
+
         telemetry.addData("Status", "Initialized");
         // initializing IMU with parameters
         myIMUParameters = new IMU.Parameters(
@@ -66,8 +106,7 @@ public class NoIMUTeleop extends OpMode
         // gets heading in radians
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         double angle = orientation.getYaw(AngleUnit.RADIANS);
-        // gets joystick values for translational motion (drive and strafe) and rotational
-        // motion
+        // gets joystick values for translational motion (drive and strafe) and turning
         double drive = -gamepad1.left_stick_y; // moving forward or backward
         double turn = gamepad1.right_stick_x; // strafing left or right
         double strafe = -gamepad1.left_stick_x; // turning clockwise or counterclockwise
@@ -77,16 +116,6 @@ public class NoIMUTeleop extends OpMode
         telemetry.addData("turn: ", turn);
         telemetry.addData("strafe: ", strafe);
         telemetry.addLine();
-        // field-relative driving instead of robot-relative driving
-
-//        double x_rotated = drive * Math.cos(angle) - strafe * Math.sin(angle);
-//        double y_rotated = drive * Math.sin(angle) + strafe * Math.cos(angle);
-//        drivetrain.powerChassisMotors(x_rotated, turn, y_rotated); // sends individual powers to the motors
-
-        // robot-relative driving settings--COMMENT ABOVE 3 LINES AND COMMENT OUT THESE LINES FOR
-        //   TESTING!!
-        drivetrain.powerChassisMotors(drive, turn, strafe);
-        drivetrain.liftSlide(lift);
 
         if (gamepad1.left_bumper){
             drivetrain.close();
@@ -94,15 +123,42 @@ public class NoIMUTeleop extends OpMode
         else if (gamepad1.right_bumper){
             drivetrain.open();
         }
-        if (gamepad1.x){
-            drivetrain.liftServo(-0.2);
-        }
         if (gamepad1.a){
             drivetrain.liftServo(0);
         }
         if (gamepad1.b){
             drivetrain.liftServo(0.33);
         }
+        // camera tracking
+        if (gamepad1.y){
+            Point center = pipeline.get_contour_center();
+            int actual = (int)center.x;
+            final double SETPOINT = ((CAMERA_WIDTH)/2) + 45;
+            strafe = PIDControl(SETPOINT, actual);
+        }
+        if(gamepad1.dpad_left){
+            pipeline.track_blue();
+            telemetry.addData("Tracked Color", "Blue");
+        }
+        if(gamepad1.dpad_right){
+            pipeline.track_red();
+            telemetry.addData("Tracked Color", "Red");
+        }
+        if(gamepad1.dpad_up){
+            pipeline.track_yellow();
+            telemetry.addData("Tracked Color", "Yellow");
+        }
+        telemetry.addData("Contour Center: ", pipeline.get_contour_center());
+        // field-relative driving instead of robot-relative driving
+        /**
+        double x_rotated = drive * Math.cos(angle) - strafe * Math.sin(angle);
+        double y_rotated = drive * Math.sin(angle) + strafe * Math.cos(angle);
+        drivetrain.powerChassisMotors(x_rotated, turn, y_rotated); // sends individual powers to the motors
+        **/
+        // robot-relative driving settings--COMMENT ABOVE 3 LINES AND COMMENT OUT THESE LINES FOR
+        drivetrain.powerChassisMotors(drive, turn, strafe);
+        drivetrain.liftSlide(lift);
+
         telemetry.addData("frontLeft Power: ", drivetrain.frontLeft.getPower());
         telemetry.addData("backLeft Power: ", drivetrain.backLeft.getPower());
         telemetry.addData("frontRight Power: ", drivetrain.frontRight.getPower());
@@ -113,5 +169,16 @@ public class NoIMUTeleop extends OpMode
         telemetry.addData("Right Pos: ", drivetrain.right.getPosition());
         telemetry.addData("Runtime", runtime.seconds());
         telemetry.update();
+    }
+    public double PIDControl(double setpoint, double current){
+        double error = setpoint - current;
+        double P_error = Kp*error;
+        // calculates derivative error
+        double D_error = Kd * (error - prevError)/runtime.seconds();
+        prevError = error;
+        // resets timer for recalculating derivative error
+        resetRuntime();
+
+        return Range.clip(P_error + D_error, -0.3, 0.3);
     }
 }

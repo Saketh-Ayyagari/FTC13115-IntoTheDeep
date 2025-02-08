@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -22,7 +23,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 
 @TeleOp(name="TrackingTeleOp", group="Iterative OpMode")
-//@Disabled
+@Disabled
 public class TrackingTeleOp extends OpMode {
 
 
@@ -45,20 +46,19 @@ public class TrackingTeleOp extends OpMode {
     private Double prevError = 0.0;
     private double error_sum = 0;
 
-    // camera variables
+    // camera variables: 480p resolution
     private static final int CAMERA_WIDTH = 640;
     private static final int CAMERA_HEIGHT = 480;
 
     private int cameraMonitorViewId;
     private OpenCvWebcam camera;
-    private WebcamName webcamName;
     private testPipeline pipeline = new testPipeline();
 
     private void initCamera(){
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "cameraMonitorViewId", "id",
                 hardwareMap.appContext.getPackageName());
-        webcamName = hardwareMap.get(WebcamName.class, "webcam13115");
+        WebcamName webcamName = hardwareMap.get(WebcamName.class, "webcam13115");
         camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
 
         camera.setPipeline(pipeline);
@@ -69,7 +69,6 @@ public class TrackingTeleOp extends OpMode {
                 //start streaming from here
                 camera.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
             }
-
             @Override
             public void onError(int errorCode) {
                 telemetry.addData("Camera error. Please try again!", null);
@@ -119,13 +118,11 @@ public class TrackingTeleOp extends OpMode {
 
         // robot-relative driving settings--COMMENT ABOVE 3 LINES AND COMMENT OUT THESE LINES FOR
         //   TESTING!!
-        enma.powerChassisMotors(drive, turn, strafe);
-
 
         //TESTING WITHOUT INTAKE ATTACHED UNCOMMENT THESE ONCE IT IS ATTACHED!!!!!
         //enma.liftSlide(lift);
 
-        /*if (gamepad1.left_bumper){
+        if (gamepad1.left_bumper){
             enma.close();
         }
         else if (gamepad1.right_bumper){
@@ -139,14 +136,14 @@ public class TrackingTeleOp extends OpMode {
         }
         if (gamepad1.b){
             enma.liftServo(0.85);
-        }*/
+        }
         if (gamepad1.y){
             Point center = pipeline.get_contour_center();
             int actual = (int)center.x;
-            double SETPOINT = (CAMERA_WIDTH)/2;
-            double speed = PIDControl(SETPOINT, actual);
+            final double SETPOINT = (CAMERA_WIDTH)/2;
+            strafe = PIDControl(SETPOINT, actual);
 
-            enma.powerChassisMotors(0, speed, 0);
+            enma.powerChassisMotors(0, strafe, 0);
         }
         if(gamepad1.dpad_left){
             pipeline.track_blue();
@@ -160,6 +157,10 @@ public class TrackingTeleOp extends OpMode {
             pipeline.track_yellow();
             telemetry.addData("Tracked Color", "Yellow");
         }
+        // sends different components of power to robot
+        enma.powerChassisMotors(drive, turn, strafe);
+        enma.liftSlide(lift);
+        
         telemetry.update();
     }
     public double PIDControl(double setpoint, double current){
