@@ -23,7 +23,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 
 @TeleOp(name="TrackingTeleOp", group="Iterative OpMode")
-@Disabled
+//@Disabled
 public class TrackingTeleOp extends OpMode {
 
 

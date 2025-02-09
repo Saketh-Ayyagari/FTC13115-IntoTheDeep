@@ -33,7 +33,7 @@ public class NoIMUTeleop extends OpMode
 {
     // Standard member variables
     private ElapsedTime runtime = new ElapsedTime();
-    private final double MAX_POWER = 0.5;
+    private final double MAX_POWER = 0.35;
     // robot classes/components
     private Robot drivetrain = new Robot(MAX_POWER);
     private IMU.Parameters myIMUParameters;
@@ -87,8 +87,8 @@ public class NoIMUTeleop extends OpMode
         );
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(myIMUParameters);
-        imu.resetYaw();
         //reset yaw
+        drivetrain.liftServo(0.33);
     }
     /*
      * Code to run ONCE when the driver hits START
@@ -97,26 +97,22 @@ public class NoIMUTeleop extends OpMode
     public void start() {
         runtime.reset();
     }
-
     /*
      * Code to run REPEATEDLY after the driver hits START but before they hit STOP
      */
     @Override
     public void loop() {
-        // gets heading in radians
-        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-        double angle = orientation.getYaw(AngleUnit.RADIANS);
         // gets joystick values for translational motion (drive and strafe) and turning
         double drive = -gamepad1.left_stick_y; // moving forward or backward
         double turn = gamepad1.right_stick_x; // strafing left or right
-        double strafe = -gamepad1.left_stick_x; // turning clockwise or counterclockwise
+        double strafe = gamepad1.left_stick_x; // turning clockwise or counterclockwise
         double lift = gamepad1.left_trigger - gamepad1.right_trigger; // lifting the slide
 
         telemetry.addData("drive: ", drive);
         telemetry.addData("turn: ", turn);
         telemetry.addData("strafe: ", strafe);
         telemetry.addLine();
-
+        // gamepad button controls
         if (gamepad1.left_bumper){
             drivetrain.close();
         }
@@ -150,11 +146,14 @@ public class NoIMUTeleop extends OpMode
         }
         telemetry.addData("Contour Center: ", pipeline.get_contour_center());
         // field-relative driving instead of robot-relative driving
-        /**
-        double x_rotated = drive * Math.cos(angle) - strafe * Math.sin(angle);
-        double y_rotated = drive * Math.sin(angle) + strafe * Math.cos(angle);
-        drivetrain.powerChassisMotors(x_rotated, turn, y_rotated); // sends individual powers to the motors
-        **/
+
+         // gets heading in radians
+         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+//         double angle = orientation.getYaw(AngleUnit.RADIANS);
+//         double x_rotated = drive * Math.cos(angle) + strafe * Math.sin(angle);
+//        double y_rotated = drive * Math.sin(angle) - strafe * Math.cos(angle);
+//        drivetrain.powerChassisMotors(x_rotated, turn, y_rotated); // sends individual powers to the motors
+
         // robot-relative driving settings--COMMENT ABOVE 3 LINES AND COMMENT OUT THESE LINES FOR
         drivetrain.powerChassisMotors(drive, turn, strafe);
         drivetrain.liftSlide(lift);
@@ -168,6 +167,7 @@ public class NoIMUTeleop extends OpMode
         telemetry.addData("Left Pos: ", drivetrain.left.getPosition());
         telemetry.addData("Right Pos: ", drivetrain.right.getPosition());
         telemetry.addData("Runtime", runtime.seconds());
+        telemetry.addData("IMU Angle", imu.getRobotOrientation());
         telemetry.update();
     }
     public double PIDControl(double setpoint, double current){

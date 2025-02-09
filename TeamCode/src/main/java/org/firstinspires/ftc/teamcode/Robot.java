@@ -318,14 +318,12 @@ public class Robot{
             slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             slide.setPower(power);
         }
-        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slide.setPower(power);
-//        else{
-//            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//            int setpoint = slide.getCurrentPosition();
-//            slide.setTargetPosition(setpoint);
-//            slide.setPower(-0.001); // tune if needed
-//        }
+        else{
+            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            int pos = slide.getCurrentPosition();
+            slide.setTargetPosition(pos);
+            slide.setPower(0.001);
+        }
     }
     // rotates pulley a certain number of rotations to lift the slide
     // two cases: up and down
