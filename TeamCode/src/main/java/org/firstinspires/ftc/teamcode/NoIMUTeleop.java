@@ -167,7 +167,7 @@ public class NoIMUTeleop extends OpMode
         telemetry.addData("Left Pos: ", drivetrain.left.getPosition());
         telemetry.addData("Right Pos: ", drivetrain.right.getPosition());
         telemetry.addData("Runtime", runtime.seconds());
-        telemetry.addData("IMU Angle", imu.getRobotOrientation());
+        telemetry.addData("IMU Angle", imu.getRobotYawPitchRollAngles());
         telemetry.update();
     }
     public double PIDControl(double setpoint, double current){
