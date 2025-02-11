@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode;// Use for teleop
 
 import static android.os.SystemClock.sleep;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -28,9 +24,9 @@ import org.openftc.easyopencv.OpenCvWebcam;
  */
 
 
-@TeleOp(name="FieldRelativeTeleop", group="Iterative OpMode")
+@TeleOp(name="RobotRelativeTeleop", group="Iterative OpMode")
 //@Disabled
-public class NoIMUTeleop extends OpMode
+public class RobotRelativeTeleop extends OpMode
 {
     // Standard member variables
     private ElapsedTime runtime = new ElapsedTime();
@@ -161,12 +157,8 @@ public class NoIMUTeleop extends OpMode
          // gets heading in radians
          YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
          double angle = orientation.getYaw(AngleUnit.RADIANS);
-         double drive_rotated = drive * Math.cos(angle) - strafe * Math.sin(angle);
-        double strafe_rotated = drive * Math.sin(angle) + strafe * Math.cos(angle);
-        drivetrain.powerChassisMotors(drive_rotated, turn, strafe_rotated); // sends individual powers to the motors
 
-        // robot-relative driving settings--COMMENT ABOVE 3 LINES AND COMMENT OUT THESE LINES FOR
-//        drivetrain.powerChassisMotors(drive, turn, strafe);
+        drivetrain.powerChassisMotors(drive, turn, strafe);
         drivetrain.liftSlide(lift);
 
         telemetry.addData("frontLeft Power: ", drivetrain.frontLeft.getPower());

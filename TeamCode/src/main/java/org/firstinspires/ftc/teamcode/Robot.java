@@ -57,8 +57,8 @@ public class Robot{
     private Telemetry telemetry; // for FTC dashboard--will integrate later
 
     // variables for claw positions
-    private final double open_pos = 0;
-    private final double closed_pos = 0.45;
+    public final double open_pos = 0;
+    public final double closed_pos = 0.45;
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
@@ -125,10 +125,10 @@ public class Robot{
         // calculates power of individual motors given drive, turn, and strafe values.
         double frontLeftPower, frontRightPower, backRightPower, backLeftPower;
 
-        frontLeftPower = drive + turn - strafe;
-        backLeftPower = drive + turn + strafe;
-        frontRightPower = drive - turn + strafe;
-        backRightPower = drive - turn - strafe;
+        frontLeftPower = drive + turn + strafe;
+        backLeftPower = drive + turn - strafe;
+        frontRightPower = drive - turn - strafe;
+        backRightPower = drive - turn + strafe;
 
         /*
          * Send calculated power to wheels
