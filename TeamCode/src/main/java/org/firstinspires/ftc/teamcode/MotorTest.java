@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,30 +18,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * Test Suite for different motors. Comment anything needed for customization
  * **/
 @TeleOp(name="MotorTest", group="Linear OpMode")
+//@Disabled
 public class MotorTest extends LinearOpMode {
-    private DcMotor test;
-    private Servo claw;
+    private final Robot robot = new Robot(0.8);
     private ElapsedTime runtime = new ElapsedTime();
-    private final double open_pos = 0.45;
-    private final double closed_pos = 0.88;
     @Override
     public void runOpMode() {
-        test = hardwareMap.get(DcMotor.class, "test");
-        claw = hardwareMap.get(Servo.class, "claw");
-        double position = open_pos;
+        robot.init(hardwareMap);
         waitForStart();
+        robot.liftServo(0.35);
         runtime.reset();
-        while (opModeIsActive()){
-            double power = gamepad1.left_stick_y;
-            test.setPower(power);
-            if (gamepad1.a){
-                position = closed_pos;
-            }
-            else if (gamepad1.b){
-                position = open_pos;
-            }
-            claw.setPosition(position);
-            telemetry.addData("Servo Position", claw.getPosition());
+        if (opModeIsActive()){
+            robot.liftSlide(27, "up");
+            sleep(500);
+            robot.liftSlide(12, "down");
             telemetry.update();
         }
     }

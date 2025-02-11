@@ -59,6 +59,7 @@ public class Robot{
     // variables for claw positions
     public final double open_pos = 0;
     public final double closed_pos = 0.45;
+    public final double FEEDFORWARD_SLIDE = 0.003; // feedforward constant for holding slide up
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
@@ -319,25 +320,26 @@ public class Robot{
             slide.setPower(power);
         }
         else{
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             int pos = slide.getCurrentPosition();
             slide.setTargetPosition(pos);
-            slide.setPower(0.001);
+            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            slide.setPower(FEEDFORWARD_SLIDE);
         }
     }
     // rotates pulley a certain number of rotations to lift the slide
     // two cases: up and down
-    public void liftSlideAuto(double inches, String dir){
+    public void liftSlide(double inches, String dir){
         double mm = inches * 25.4; // converting inches to mm
-        final double TICKS_PER_REV = 2786.2; // ticks per revolution
+        final double TICKS_PER_REV = 537.7; // ticks per revolution
         final double MM_PER_ROTATION = 120; // for every 1 rotation, the belt moves 120 MM
 
-        int target = (int)(((2786.2)/(38.2*Math.PI)) * mm); //
+        int target = (int)(((TICKS_PER_REV)/(38.2*Math.PI)) * mm); //
 
         double power = MAX_POWER;
         slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        if (dir.equals("down")){
+        if (dir.equals("up")){
             //go down target ticks
             //neg power neg target
             power *= -1;
@@ -347,7 +349,10 @@ public class Robot{
         slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         slide.setPower(power);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        while (slide.isBusy()){
+            // telemetry.update();
+        }
+        slide.setPower(FEEDFORWARD_SLIDE);
     }
     // SERVO RANGE FROM 0 - 1
     public void open(){

@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode;// Use for teleop
 
 import static android.os.SystemClock.sleep;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -24,13 +20,11 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 /*
  * Saketh Ayyagari
- * Regular Teleop without IMU Assist
+ * Field-Relative Teleop. USE ONLY IF IMU IS INTIALIZED TO 0 RAD VERTICALLY TO FIELD
  */
-
-
-@TeleOp(name="FieldRelativeTeleop", group="Iterative OpMode")
+@TeleOp(name="FieldRelativeTeleOp", group="Iterative OpMode")
 //@Disabled
-public class NoIMUTeleop extends OpMode
+public class FieldRelativeTeleop extends OpMode
 {
     // Standard member variables
     private ElapsedTime runtime = new ElapsedTime();
