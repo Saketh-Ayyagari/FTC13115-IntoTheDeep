@@ -27,7 +27,8 @@
 //        runtime.reset();
 //
 //        robot.liftServo(0.85);
-//        //Armless Autonomous Strategy show in Armless Auto Strat 1 Corrected.pdf https://drive.google.com/drive/u/1/folders/1flgkWB1yZEToVUaXiTsMUBPjUwb2EzVf
+//        //Armless Autonomous Strategy show in Armless Auto Strat 1
+//        Corrected.pdf https://drive.google.com/drive/u/1/folders/1flgkWB1yZEToVUaXiTsMUBPjUwb2EzVf
 //        //start robot facing the outside on second tile line
 //        robot.moveRobotwEncoders("right", 29, robot.MAX_POWER);
 //        //robot.turnDegrees("90", );
