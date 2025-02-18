@@ -21,6 +21,14 @@ public class PIDController{
         this.error_sum = 0;
         this.prev_error = 0;
     }
+    public PIDController(double Kp){
+        this.Kp = Kp;
+        this.Ki = 0;
+        this.Kd = 0;
+        this.runtime = new ElapsedTime();
+        this.error_sum = 0;
+        this.prev_error = 0;
+    }
     public double update(double setpoint, double actual){
         // calculate proportional term
         double error = setpoint - actual;

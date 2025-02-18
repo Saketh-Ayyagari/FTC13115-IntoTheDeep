@@ -30,7 +30,7 @@ public class RobotRelativeTeleop extends OpMode
 {
     // Standard member variables
     private ElapsedTime runtime = new ElapsedTime();
-    private final double MAX_POWER = 0.7;
+    private final double MAX_POWER = 0.3;
     // robot classes/components
     private Robot drivetrain = new Robot(MAX_POWER);
     private IMU.Parameters myIMUParameters;
@@ -48,6 +48,7 @@ public class RobotRelativeTeleop extends OpMode
     private Double prevError = 0.0;
     private double error_sum = 0;
 
+    private final PIDController slide_control = new PIDController(0.03125);
 
     private void initCamera(){
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
@@ -87,7 +88,7 @@ public class RobotRelativeTeleop extends OpMode
         //reset yaw
         imu.resetYaw();
         // initialize arm to be in upper position
-        drivetrain.liftServo(0.33);
+        drivetrain.liftServo(0.35);
     }
     /*
      * Code to run ONCE when the driver hits START
@@ -106,6 +107,15 @@ public class RobotRelativeTeleop extends OpMode
         double turn = gamepad1.right_stick_x; // strafing left or right
         double strafe = gamepad1.left_stick_x; // turning clockwise or counterclockwise
         double lift = gamepad1.left_trigger - gamepad1.right_trigger; // lifting the slide
+        // Closed-loop control for slide
+        // if the power of the slide motor is within a small range, have the power sent be
+        // closed loop control
+        if (Math.abs(lift) < 0.001){
+            int setpoint = drivetrain.slide.getCurrentPosition();
+            lift = slide_control.update(setpoint,
+                    drivetrain.slide.getCurrentPosition()
+            );
+        }
 
         telemetry.addData("drive: ", drive);
         telemetry.addData("turn: ", turn);
