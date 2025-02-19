@@ -49,23 +49,17 @@ public class Robot{
     // motors for slide and intake control
     public DcMotor slide;
     public Servo extend;
-    public Servo claw;
-
-
-    //PID stuff
-
-    private final double Kp = 0.03125;
-    private final double Ki = 0;
-    private final double Kd = 0;
-    private Double prevError = 0.0;
-    private double error_sum = 0;
-    double SETPOINT = 0;
+    public Servo left, right;
 
     // maximum power robot can drive
     public double MAX_POWER;
 
     private Telemetry telemetry; // for FTC dashboard--will integrate later
 
+    // variables for claw positions
+    public final double open_pos = 0;
+    public final double closed_pos = 0.45;
+    public final double FEEDFORWARD_SLIDE = 0.003; // feedforward constant for holding slide up
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
@@ -86,28 +80,25 @@ public class Robot{
 
         slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
         extend = hardwareMp.get(Servo.class, "extend");
-        claw = hardwareMp.get(Servo.class, "claw");
+        left = hardwareMp.get(Servo.class, "left");
+        right = hardwareMp.get(Servo.class, "right");
 
-        backRight.setDirection(DcMotor.Direction.REVERSE);
-        frontRight.setDirection(DcMotor.Direction.REVERSE);
-
-        //backLeft.setDirection(DcMotor.Direction.REVERSE);
-        //frontLeft.setDirection(DcMotor.Direction.REVERSE);
-        //slide.setDirection(DcMotor.Direction.REVERSE); // FIX -- 11/25; test if needed
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
 
         // setting the mode of each motor to run without encoders
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //start at 0 power
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     /*
     * Positive power = rotate counterclockwise (causes heading to become larger)
@@ -132,19 +123,23 @@ public class Robot{
     }
     // given parameters for drive, rotation, and strafe power, send power to the motors
     public void powerChassisMotors(double drive, double turn, double strafe){
-        // calculates left and right side power after applying driving and turning
-        double leftPower = Range.clip(drive - turn, -MAX_POWER, MAX_POWER);
-        double rightPower = Range.clip(drive + turn, -MAX_POWER, MAX_POWER);
+        // calculates power of individual motors given drive, turn, and strafe values.
+        double frontLeftPower, frontRightPower, backRightPower, backLeftPower;
 
-        /**
-          * Send calculated power after adding/subtracting strafing power to wheels
-          * strafing happens independently on each wheel
-          * Range.clip() clamps the power sent to each motor between -MAX_POWER and MAXPOWER
-         **/
-        frontLeft.setPower(Range.clip(leftPower-strafe, -MAX_POWER, MAX_POWER));
-        frontRight.setPower(Range.clip(rightPower+strafe, -MAX_POWER, MAX_POWER));
-        backLeft.setPower(Range.clip(leftPower+strafe, -MAX_POWER, MAX_POWER));
-        backRight.setPower(Range.clip(rightPower-strafe, -MAX_POWER, MAX_POWER));
+        frontLeftPower = drive + turn + strafe;
+        backLeftPower = drive + turn - strafe;
+        frontRightPower = drive - turn - strafe;
+        backRightPower = drive - turn + strafe;
+
+        /*
+         * Send calculated power to wheels
+         * strafing happens independently on each wheel
+         * Range.clip() clamps the power sent to each motor between -MAX_POWER and MAX_POWER
+         * */
+        frontLeft.setPower(Range.clip(frontLeftPower, -MAX_POWER, MAX_POWER));
+        frontRight.setPower(Range.clip(frontRightPower, -MAX_POWER, MAX_POWER));
+        backLeft.setPower(Range.clip(backLeftPower, -MAX_POWER, MAX_POWER));
+        backRight.setPower(Range.clip(backRightPower, -MAX_POWER, MAX_POWER));
     }
 
     /**
@@ -178,43 +173,45 @@ public class Robot{
         double frontRightPower = speed;
         double backRightPower = speed;
 
-
-        // different scenarios based on direction specified
-        int frontLeftTarget = (int)target;
-        int backLeftTarget = (int)target;
-
-        int frontRightTarget = (int)target;
-        int backRightTarget = (int)target;
         // different scenarios based on direction specified
         switch(direction){
             case "forward":
-                frontLeftTarget *= -1;
-                backLeftTarget *= -1;
-                frontRightTarget *= -1;
-                backRightTarget *= -1;
+                frontLeft.setTargetPosition((int)target);
+                backLeft.setTargetPosition((int)target);
+                frontRight.setTargetPosition((int)target);
+                backRight.setTargetPosition((int)target);
+                break;
+            case "backward":
+                frontLeft.setTargetPosition(-(int) target);
+                backLeft.setTargetPosition(-(int) target);
+                frontRight.setTargetPosition(-(int) target);
+                backRight.setTargetPosition(-(int) target);
 
                 frontLeftPower *= -1;
                 backLeftPower *= -1;
                 frontRightPower *= -1;
                 backRightPower *= -1;
-                break;
-            case "backward":
 
                 break;
             case "left":
-                backLeftTarget *= -1;//.setTargetPosition(-(int)target);
-                frontRightTarget *= -1; //.setTargetPosition(-(int)target);
-
-
-                backLeftPower *= -1;
-                backRightPower *= -1;
-                break;
-            case "right":
-                frontLeftTarget *= -1;//.setTargetPosition(-(int)target);
-                backRightTarget *= -1;//.setTargetPosition(-(int)target);
-
+                frontLeft.setTargetPosition(-(int)target);
+                backLeft.setTargetPosition((int)target);
+                frontRight.setTargetPosition((int)target);
+                backRight.setTargetPosition(-(int)target);
+                
                 frontLeftPower *= -1;
                 backLeftPower *= -1;
+
+                break;
+            case "right":
+                frontLeft.setTargetPosition((int)target);
+                backLeft.setTargetPosition(-(int)target);
+                frontRight.setTargetPosition(-(int)target);
+                backRight.setTargetPosition((int)target);
+                
+                frontRightPower *= -1;
+                backRightPower *= -1;
+
                 break;
         }
 
@@ -233,128 +230,14 @@ public class Robot{
 
         // Wait until the motors reach the target position
         while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
-
+            //telemetry.update();
         }
         backRight.setPower(0);
         backLeft.setPower(0);
         frontRight.setPower(0);
         frontLeft.setPower(0);
     }
-    public void moveRobotwEncodersPID(String direction, double inches, double speed){
-        // Set the motor to run using encoders
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // Reset the encoder
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        final double TICKS_PER_REV = 537.7; // encoder resolution
-        final double WHEEL_DIAMETER = 104 / 25.4; // inches
-        final double TICKS_PER_IN = TICKS_PER_REV / (WHEEL_DIAMETER*Math.PI);
-
-        double target = inches * TICKS_PER_IN;; // may have to find a way to convert from inches to ticks
-
-        double frontLeftPower = speed;
-        double backLeftPower = speed;
-        double frontRightPower = speed;
-        double backRightPower = speed;
-
-
-
-        int frontLeftTarget = (int)target;
-        int backLeftTarget = (int)target;
-
-        int frontRightTarget = (int)target;
-        int backRightTarget = (int)target;
-        // different scenarios based on direction specified
-        switch(direction){
-            case "forward":
-                frontLeftTarget *= -1;
-                backLeftTarget *= -1;
-                frontRightTarget *= -1;
-                backRightTarget *= -1;
-
-                frontLeftPower *= -1;
-                backLeftPower *= -1;
-                frontRightPower *= -1;
-                backRightPower *= -1;
-                break;
-            case "backward":
-
-                break;
-            case "left":
-                backLeftTarget *= -1;//.setTargetPosition(-(int)target);
-                frontRightTarget *= -1; //.setTargetPosition(-(int)target);
-
-
-                backLeftPower *= -1;
-                backRightPower *= -1;
-                break;
-            case "right":
-                frontLeftTarget *= -1;//.setTargetPosition(-(int)target);
-                backRightTarget *= -1;//.setTargetPosition(-(int)target);
-
-                frontLeftPower *= -1;
-                backLeftPower *= -1;
-                break;
-        }
-
-        // Set the motor to run to the target position
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
-        // Set the motor power
-        frontLeft.setPower(frontLeftPower);
-        backLeft.setPower(backLeftPower);
-        frontRight.setPower(frontRightPower);
-        backRight.setPower(backRightPower);
-/*
-        int frontLeftError = frontLeftTarget - frontLeft.getCurrentPosition();
-        int backLeftError = backLeftTarget - backLeft.getCurrentPosition();
-        int frontRightError = frontRightTarget - frontRight.getCurrentPosition();
-        int backRightError = backRightTarget - backRight.getCurrentPosition();
-*/
-        double tolerance = 100;
-        // Wait until the motors reach the target position
-        while (Math.abs(frontLeftTarget - frontLeft.getCurrentPosition()) >= tolerance) { // Optionally, you can add some telemetry or logging here
-            frontLeftPower = pid(frontLeftTarget, frontLeft.getCurrentPosition());
-            backLeftPower = pid(backLeftTarget, backLeft.getCurrentPosition());
-            frontRightPower = pid(frontRightTarget, frontRight.getCurrentPosition());
-            backRightPower = pid(backRightTarget, backRight.getCurrentPosition());
-
-
-            //add previous error to use derivative term
-
-            frontLeft.setPower(frontLeftPower);
-            backLeft.setPower(backLeftPower);
-            frontRight.setPower(backRightPower);
-            backRight.setPower(backRightPower);
-        }
-        backRight.setPower(0);
-        backLeft.setPower(0);
-        frontRight.setPower(0);
-        frontLeft.setPower(0);
-    }
-    public double pid(int target, int current){
-
-        int error = target-current;
-
-        double power = (Kp * error) /*+ (Ki * integralSum)*/ /*+ (Kd * derivative)*/;
-
-        return power;
-
-
-
-    }
-        public void turnDegrees(double targetDegrees, String dir) {
+    public void turnDegrees(double targetDegrees, String dir) {
         // Set the motor to run using encoders
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -392,11 +275,11 @@ public class Robot{
         int rightTarget = targetPosition;
 
         if (dir.equals("clockwise")) {
-            leftPowerLevel *= -1;
-            leftTarget *= -1;
-        } else if (dir.equals("counterclockwise")) {
             rightPowerLevel *= -1;
             rightTarget *= -1;
+        } else if (dir.equals("counterclockwise")) {
+            leftPowerLevel *= -1;
+            leftTarget *= -1;
         }
         frontLeft.setTargetPosition(leftTarget);
         frontRight.setTargetPosition(rightTarget);
@@ -422,11 +305,11 @@ public class Robot{
 //            telemetry.addData("Left Back Current Position", backLeft.getCurrentPosition());
 //            telemetry.addData("Right Front Current Position", frontRight.getCurrentPosition());
 //            telemetry.addData("Right Back Current Position", backRight.getCurrentPosition());
-//            telemetry.update();
+            telemetry.update();
         }
 
     }
-    // lifts extender to change orientation of the sample grip
+     // lifts extender to change orientation of the sample grip
     public void liftServo(double position){
         extend.setPosition(position);
     }
@@ -437,25 +320,26 @@ public class Robot{
             slide.setPower(power);
         }
         else{
-            slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            int setpoint = slide.getCurrentPosition();
-            slide.setTargetPosition(setpoint);
-            slide.setPower(0.002); // tune if needed
+            int pos = slide.getCurrentPosition();
+            slide.setTargetPosition(pos);
+            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            slide.setPower(FEEDFORWARD_SLIDE);
         }
     }
     // rotates pulley a certain number of rotations to lift the slide
     // two cases: up and down
-    public void liftSlideAuto(double inches, String dir){
+    public void liftSlide(double inches, String dir){
         double mm = inches * 25.4; // converting inches to mm
-        final double TICKS_PER_REV = 2786.2; // ticks per revolution
+        final double TICKS_PER_REV = 537.7; // ticks per revolution
         final double MM_PER_ROTATION = 120; // for every 1 rotation, the belt moves 120 MM
 
-        int target = (int)(((2786.2)/(38.2*Math.PI)) * mm); //
+        int target = (int)(((TICKS_PER_REV)/(38.2*Math.PI)) * mm); //
 
         double power = MAX_POWER;
         slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        if (dir.equals("down")){
+        if (dir.equals("up")){
             //go down target ticks
             //neg power neg target
             power *= -1;
@@ -465,14 +349,20 @@ public class Robot{
         slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         slide.setPower(power);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        while (slide.isBusy()){
+            // telemetry.update();
+        }
+        slide.setPower(FEEDFORWARD_SLIDE);
     }
-    // continuously rolls the active intake inward
+    // SERVO RANGE FROM 0 - 1
     public void open(){
-        claw.setPosition(0);
+        left.setPosition(open_pos);
+        right.setPosition(closed_pos);
     }
     public void close(){
-        claw.setPosition(-0.5);
+        left.setPosition(closed_pos);
+        right.setPosition(open_pos);
     }
+    // accesser methods--for debugging purposes
 }
 
