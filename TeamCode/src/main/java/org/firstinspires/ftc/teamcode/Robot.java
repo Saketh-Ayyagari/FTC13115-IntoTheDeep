@@ -322,11 +322,10 @@ public class Robot{
     // rotates pulley a certain number of rotations to lift the slide
     // two cases: up and down
     public void liftSlide(double inches, String dir){
-        double mm = inches * 25.4; // converting inches to mm
         final double TICKS_PER_REV = 537.7; // ticks per revolution
-        final double MM_PER_ROTATION = 120; // for every 1 rotation, the belt moves 120 MM
+        final double INCHES_PER_REV = 120/25.4; // for every 1 rotation, the belt moves 120 MM
 
-        int target = (int)(((TICKS_PER_REV)/(38.2*Math.PI)) * mm); //
+        int target = (int)(((TICKS_PER_REV)/(INCHES_PER_REV)) * inches); 
 
         double power = MAX_POWER;
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
