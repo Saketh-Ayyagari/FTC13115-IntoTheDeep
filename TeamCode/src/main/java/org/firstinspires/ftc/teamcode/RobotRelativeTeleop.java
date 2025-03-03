@@ -30,7 +30,7 @@ public class RobotRelativeTeleop extends OpMode
 {
     // Standard member variables
     private ElapsedTime runtime = new ElapsedTime();
-    private final double MAX_POWER = 0.3;
+    private final double MAX_POWER = 0.6;
     // robot classes/components
     private Robot drivetrain = new Robot(MAX_POWER);
     private IMU.Parameters myIMUParameters;
@@ -43,12 +43,12 @@ public class RobotRelativeTeleop extends OpMode
     private testPipeline pipeline = new testPipeline();
     // PID Values
     private final double Kp = 0.003125;
-    private final double Ki = 0.0;
     private final double Kd = 0.0;
     private Double prevError = 0.0;
-    private double error_sum = 0;
+    private double setpoint_angle;
+    private int setpoint_slide;
 
-    private final PIDController slide_control = new PIDController(0.03125);
+    private final PIDController slide_control = new PIDController(0.075);
 
     private void initCamera(){
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
@@ -87,6 +87,7 @@ public class RobotRelativeTeleop extends OpMode
         imu.initialize(myIMUParameters);
         //reset yaw
         imu.resetYaw();
+        setpoint_angle = imu.getRobotYawPitchRollAngles().getYaw();
         // initialize arm to be in upper position
         drivetrain.liftServo(0.35);
     }
@@ -107,6 +108,23 @@ public class RobotRelativeTeleop extends OpMode
         double turn = gamepad1.right_stick_x; // strafing left or right
         double strafe = gamepad1.left_stick_x; // turning clockwise or counterclockwise
         double lift = gamepad1.left_trigger - gamepad1.right_trigger; // lifting the slide
+//        String state = "unlock";
+//        // IMU-Assist for Teleop
+//        // changes state variable based on controller input
+//        if (Math.abs(turn) < 0.01){
+//            state = "unlock";
+//        }
+//        else{
+//            state = "lock";
+//        }
+//        switch(state){
+//            case "lock": // turn value is PD output
+//                turn = PIDControl(setpoint, imu.getRobotYawPitchRollAngles().getYaw());
+//                break;
+//            case "unlock": // non-zero turn value changes setpoint
+//                setpoint = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+//                break;
+//        }
         // Closed-loop control for slide
         // if the power of the slide motor is within a small range, have the power sent be
         // closed loop control
@@ -115,6 +133,9 @@ public class RobotRelativeTeleop extends OpMode
             lift = slide_control.update(setpoint,
                     drivetrain.slide.getCurrentPosition()
             );
+            telemetry.addData("Slide Setpoint: ", setpoint);
+            telemetry.addData("Slide Current Value: ", drivetrain.slide.getCurrentPosition());
+            telemetry.addData("Slide Power sent (NEGATIVE MUST BE UP): ", lift);
         }
 
         telemetry.addData("drive: ", drive);
@@ -129,10 +150,10 @@ public class RobotRelativeTeleop extends OpMode
             drivetrain.open();
         }
         if (gamepad1.a){
-            drivetrain.liftServo(0);
+            drivetrain.liftServo(0.01);
         }
         if (gamepad1.b){
-            drivetrain.liftServo(0.33);
+            drivetrain.liftServo(0.35);
         }
         // second controller controls: semi-autonomous
         if (gamepad2.a){
@@ -192,6 +213,6 @@ public class RobotRelativeTeleop extends OpMode
         // resets timer for recalculating derivative error
         resetRuntime();
 
-        return Range.clip(P_error + D_error, -0.3, 0.3);
+        return Range.clip(P_error + D_error, -1, 1);
     }
 }

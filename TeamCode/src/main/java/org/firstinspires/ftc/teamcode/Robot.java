@@ -59,8 +59,9 @@ public class Robot{
     // variables for claw positions
     public final double open_pos = 0;
     public final double closed_pos = 0.45;
-    public final double FEEDFORWARD_SLIDE = 0.003; // feedforward constant for holding slide up
-
+    // variables for closed-loop slide control
+    private final PIDController slideControl = new PIDController(0.008); // feedforward constant for holding slide up
+    private int setpoint_slide;
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
     public Robot(double max_power){
@@ -163,7 +164,7 @@ public class Robot{
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         final double TICKS_PER_REV = 537.7; // encoder resolution
-        final double WHEEL_DIAMETER = 104 / 25.4; // inches
+        final double WHEEL_DIAMETER = 96 / 25.4; // inches
         final double TICKS_PER_IN = TICKS_PER_REV / (WHEEL_DIAMETER*Math.PI);
 
         double target = inches * TICKS_PER_IN;; // may have to find a way to convert from inches to ticks
@@ -232,12 +233,9 @@ public class Robot{
         while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
             //telemetry.update();
         }
-        backRight.setPower(0);
-        backLeft.setPower(0);
-        frontRight.setPower(0);
-        frontLeft.setPower(0);
+        this.brake();
     }
-    public void turnDegrees(double targetDegrees, String dir) {
+    public void turnDegrees(double targetDegrees, String dir, double power) {
         // Set the motor to run using encoders
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -264,13 +262,13 @@ public class Robot{
          * MAKE THIS A PARAMETER OF THE CLASS CONSTRUCTOR FOR REPRODUCIBILITY
          * **/
         final double TICKS_PER_REV = 537.7; // encoder resolution
-        final double WHEEL_DIAMETER = 104 / 25.4; // inches
+        final double WHEEL_DIAMETER = 96 / 25.4; // inches
         final double TICKS_PER_IN = TICKS_PER_REV / (WHEEL_DIAMETER*Math.PI);
 
         int targetPosition = (int) (target_inches * TICKS_PER_IN);
 
-        double leftPowerLevel = MAX_POWER;
-        double rightPowerLevel = MAX_POWER;
+        double leftPowerLevel = power;
+        double rightPowerLevel = power;
         int leftTarget = targetPosition;
         int rightTarget = targetPosition;
 
@@ -301,10 +299,6 @@ public class Robot{
 //
 //        // Wait until the motor reaches the target position
        while (frontLeft.isBusy()) {
-//            telemetry.addData("Left Front Current Position", frontLeft.getCurrentPosition());
-//            telemetry.addData("Left Back Current Position", backLeft.getCurrentPosition());
-//            telemetry.addData("Right Front Current Position", frontRight.getCurrentPosition());
-//            telemetry.addData("Right Back Current Position", backRight.getCurrentPosition());
             telemetry.update();
         }
 
@@ -318,13 +312,11 @@ public class Robot{
         if (power != 0){
             slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             slide.setPower(power);
+            setpoint_slide = slide.getCurrentPosition();
         }
         else{
-            int pos = slide.getCurrentPosition();
-            slide.setTargetPosition(pos);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            slide.setPower(FEEDFORWARD_SLIDE);
+            double power_hold = slideControl.update(setpoint_slide, slide.getCurrentPosition());
+            slide.setPower(power_hold);
         }
     }
     // rotates pulley a certain number of rotations to lift the slide
@@ -337,6 +329,7 @@ public class Robot{
         int target = (int)(((TICKS_PER_REV)/(38.2*Math.PI)) * mm); //
 
         double power = MAX_POWER;
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         if (dir.equals("up")){
@@ -345,14 +338,15 @@ public class Robot{
             power *= -1;
             target *= -1;
         }
-        slide.setTargetPosition(target);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        slide.setPower(power);
-        while (slide.isBusy()){
-            // telemetry.update();
+//        slide.setTargetPosition(target);
+//        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        slide.setPower(power);
+        int error = target - slide.getCurrentPosition();
+        while (error > 5){
+            //
+            slide.setPower(Range.clip(slideControl.update(target,
+                    slide.getCurrentPosition()), -1, 1));
         }
-        slide.setPower(FEEDFORWARD_SLIDE);
     }
     // SERVO RANGE FROM 0 - 1
     public void open(){
@@ -363,6 +357,5 @@ public class Robot{
         left.setPosition(closed_pos);
         right.setPosition(open_pos);
     }
-    // accesser methods--for debugging purposes
 }
 

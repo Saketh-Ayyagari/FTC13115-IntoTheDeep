@@ -25,26 +25,20 @@ public class TwoSampleAuto extends LinearOpMode {
 
         // Wait for the game to start (driver presses START)
         waitForStart();
+
         runtime.reset();
         /** Autonomous Strategy:
          * Hang one specimen onto high bar
          * Place two samples in low basket (or high basket if possible)
-         * **/
+         **/
         if (opModeIsActive()){
-            int milli = 750;
             robot.close();
-            sleep(milli);
-            robot.moveRobotwEncoders("forward", 25, robot.MAX_POWER);
-            sleep(milli);
-            robot.liftSlide(9, "up");
-            sleep(milli);
-            robot.moveRobotwEncoders("forward", 1, 0.1);
-            sleep(milli);
-            robot.liftSlide(6, "down");
-            sleep(milli);
+            robot.liftSlide(17.5, "up");
+            robot.moveRobotwEncoders("forward", 31, 0.5);
+            robot.liftSlide(8, "down");
             robot.open();
-            sleep(milli);
-            robot.moveRobotwEncoders("backward", 24, robot.MAX_POWER);
+            robot.moveRobotwEncoders("backward", 24, 0.5);
+            // strafe left until camera detects sample
         }
     }
 }

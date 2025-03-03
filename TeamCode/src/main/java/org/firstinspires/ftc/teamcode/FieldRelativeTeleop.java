@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;// Use for teleop
 import static android.os.SystemClock.sleep;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -23,7 +24,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
  * Field-Relative Teleop. USE ONLY IF IMU IS INTIALIZED TO 0 RAD VERTICALLY TO FIELD
  */
 @TeleOp(name="FieldRelativeTeleOp", group="Iterative OpMode")
-//@Disabled
+@Disabled
 public class FieldRelativeTeleop extends OpMode
 {
     // Standard member variables
