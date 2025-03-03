@@ -325,7 +325,7 @@ public class Robot{
         final double TICKS_PER_REV = 537.7; // ticks per revolution
         final double INCHES_PER_REV = 120/25.4; // for every 1 rotation, the belt moves 120 MM
 
-        int target = (int)(((TICKS_PER_REV)/(INCHES_PER_REV)) * inches); 
+        int target = (int)(((TICKS_PER_REV)/(INCHES_PER_REV)) * inches);
 
         double power = MAX_POWER;
         slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -341,11 +341,13 @@ public class Robot{
 //        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        slide.setPower(power);
         int error = target - slide.getCurrentPosition();
-        while (error > 5){
-            //
+        while (Math.abs(error) > 5){
+            // moves the slide until the error between the target and current position becomes less than 5 ticks
             slide.setPower(Range.clip(slideControl.update(target,
                     slide.getCurrentPosition()), -1, 1));
+            error = target - slide.getCurrentPosition();
         }
+        // constant power sent to slide motor from there
     }
     // SERVO RANGE FROM 0 - 1
     public void open(){
