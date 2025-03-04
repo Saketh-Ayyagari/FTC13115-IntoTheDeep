@@ -41,7 +41,7 @@ public class RobotRelativeTeleop extends OpMode
     private int cameraMonitorViewId;
     private OpenCvWebcam camera;
     private testPipeline pipeline = new testPipeline();
-    // PID Values
+    // PID Values for camera lock
     private final double Kp = 0.003125;
     private final double Kd = 0.0;
     private Double prevError = 0.0;
@@ -49,7 +49,7 @@ public class RobotRelativeTeleop extends OpMode
     private int setpoint_slide;
 
     private final PIDController slide_control = new PIDController(0.075);
-
+    private final PIDController angle_lock = new PIDController(0.075, true);
     private void initCamera(){
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "cameraMonitorViewId", "id",
@@ -108,23 +108,23 @@ public class RobotRelativeTeleop extends OpMode
         double turn = gamepad1.right_stick_x; // strafing left or right
         double strafe = gamepad1.left_stick_x; // turning clockwise or counterclockwise
         double lift = gamepad1.left_trigger - gamepad1.right_trigger; // lifting the slide
-//        String state = "unlock";
-//        // IMU-Assist for Teleop
-//        // changes state variable based on controller input
-//        if (Math.abs(turn) < 0.01){
-//            state = "unlock";
-//        }
-//        else{
-//            state = "lock";
-//        }
-//        switch(state){
-//            case "lock": // turn value is PD output
-//                turn = PIDControl(setpoint, imu.getRobotYawPitchRollAngles().getYaw());
-//                break;
-//            case "unlock": // non-zero turn value changes setpoint
-//                setpoint = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-//                break;
-//        }
+        String state = "unlock";
+        // IMU-Assist for Teleop
+        // changes state variable based on controller input
+        if (Math.abs(turn) < 0.01){
+            state = "unlock";
+        }
+        else{
+            state = "lock";
+        }
+        switch(state){
+            case "lock": // turn value is PD output
+                turn = angle_lock.update(setpoint_angle, imu.getRobotYawPitchRollAngles().getYaw());
+                break;
+            case "unlock": // non-zero turn value changes setpoint
+                setpoint_angle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                break;
+        }
         // Closed-loop control for slide
         // if the power of the slide motor is within a small range, have the power sent be
         // closed loop control
