@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -22,6 +23,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -50,16 +52,18 @@ public class Robot{
     public DcMotor slide;
     public Servo extend;
     public Servo left, right;
-
+    // sensor to control distance from the bottom
+    public Rev2mDistanceSensor distance_slide;
     // maximum power robot can drive
     public double MAX_POWER;
 
     private Telemetry telemetry; // for FTC dashboard--will integrate later
-
     // variables for claw positions
     public final double open_pos = 0;
     public final double closed_pos = 0.45;
-    public final double FEEDFORWARD_SLIDE = 0.003; // feedforward constant for holding slide up
+    // variables for closed-loop slide control
+    private final PIDController slideControl = new PIDController(0.03125); // feedforward constant for holding slide up
+    private int setpoint_slide;
 
     // initializes robot motors, encoders, etc. MUST be run before any movement occurs
     // the init method must be the one to take in a
@@ -82,6 +86,7 @@ public class Robot{
         extend = hardwareMp.get(Servo.class, "extend");
         left = hardwareMp.get(Servo.class, "left");
         right = hardwareMp.get(Servo.class, "right");
+        distance_slide = hardwareMp.get(Rev2mDistanceSensor.class, "slide-distance");
 
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -130,12 +135,11 @@ public class Robot{
         backLeftPower = drive + turn - strafe;
         frontRightPower = drive - turn - strafe;
         backRightPower = drive - turn + strafe;
-
         /*
          * Send calculated power to wheels
          * strafing happens independently on each wheel
          * Range.clip() clamps the power sent to each motor between -MAX_POWER and MAX_POWER
-         * */
+         */
         frontLeft.setPower(Range.clip(frontLeftPower, -MAX_POWER, MAX_POWER));
         frontRight.setPower(Range.clip(frontRightPower, -MAX_POWER, MAX_POWER));
         backLeft.setPower(Range.clip(backLeftPower, -MAX_POWER, MAX_POWER));
@@ -163,7 +167,7 @@ public class Robot{
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         final double TICKS_PER_REV = 537.7; // encoder resolution
-        final double WHEEL_DIAMETER = 104 / 25.4; // inches
+        final double WHEEL_DIAMETER = 96 / 25.4; // inches
         final double TICKS_PER_IN = TICKS_PER_REV / (WHEEL_DIAMETER*Math.PI);
 
         double target = inches * TICKS_PER_IN;; // may have to find a way to convert from inches to ticks
@@ -232,12 +236,9 @@ public class Robot{
         while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
             //telemetry.update();
         }
-        backRight.setPower(0);
-        backLeft.setPower(0);
-        frontRight.setPower(0);
-        frontLeft.setPower(0);
+        this.brake();
     }
-    public void turnDegrees(double targetDegrees, String dir) {
+    public void turnDegrees(double targetDegrees, String dir, double power) {
         // Set the motor to run using encoders
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -264,13 +265,13 @@ public class Robot{
          * MAKE THIS A PARAMETER OF THE CLASS CONSTRUCTOR FOR REPRODUCIBILITY
          * **/
         final double TICKS_PER_REV = 537.7; // encoder resolution
-        final double WHEEL_DIAMETER = 104 / 25.4; // inches
+        final double WHEEL_DIAMETER = 96 / 25.4; // inches
         final double TICKS_PER_IN = TICKS_PER_REV / (WHEEL_DIAMETER*Math.PI);
 
         int targetPosition = (int) (target_inches * TICKS_PER_IN);
 
-        double leftPowerLevel = MAX_POWER;
-        double rightPowerLevel = MAX_POWER;
+        double leftPowerLevel = power;
+        double rightPowerLevel = power;
         int leftTarget = targetPosition;
         int rightTarget = targetPosition;
 
@@ -301,10 +302,6 @@ public class Robot{
 //
 //        // Wait until the motor reaches the target position
        while (frontLeft.isBusy()) {
-//            telemetry.addData("Left Front Current Position", frontLeft.getCurrentPosition());
-//            telemetry.addData("Left Back Current Position", backLeft.getCurrentPosition());
-//            telemetry.addData("Right Front Current Position", frontRight.getCurrentPosition());
-//            telemetry.addData("Right Back Current Position", backRight.getCurrentPosition());
             telemetry.update();
         }
 
@@ -318,41 +315,56 @@ public class Robot{
         if (power != 0){
             slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             slide.setPower(power);
+            setpoint_slide = slide.getCurrentPosition();
         }
         else{
-            int pos = slide.getCurrentPosition();
-            slide.setTargetPosition(pos);
-            slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            slide.setPower(FEEDFORWARD_SLIDE);
+            double power_hold = slideControl.update(setpoint_slide, slide.getCurrentPosition());
+            slide.setPower(power_hold);
         }
     }
-    // rotates pulley a certain number of rotations to lift the slide
-    // two cases: up and down
+//    // rotates pulley a certain number of rotations to lift the slide
+//    // two cases: up and down
+//    public void liftSlide(double inches, String dir){
+//        final double TICKS_PER_REV = 537.7; // ticks per revolution
+//        final double INCHES_PER_REV = 120/25.4; // for every 1 rotation, the belt moves 120 MM
+//
+//        int target = (int)(((TICKS_PER_REV)/(INCHES_PER_REV)) * inches);
+//
+//        double power = MAX_POWER;
+//        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//
+//        if (dir.equals("up")){
+//            //go down target ticks
+//            //neg power neg target
+//            power *= -1;
+//            target *= -1;
+//        }
+////        slide.setTargetPosition(target);
+////        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+////        slide.setPower(power);
+//        int error = target - slide.getCurrentPosition();
+//        while (Math.abs(error) > 5){
+//            // moves the slide until the error between the target and current position becomes less than 5 ticks
+//            slide.setPower(Range.clip(slideControl.update(target,
+//                    slide.getCurrentPosition()), -1, 1));
+//            error = target - slide.getCurrentPosition();
+//        }
+//        // constant power sent to slide motor from there
+//    }
+    // inches represent the global position of the slide
     public void liftSlide(double inches, String dir){
-        double mm = inches * 25.4; // converting inches to mm
-        final double TICKS_PER_REV = 537.7; // ticks per revolution
-        final double MM_PER_ROTATION = 120; // for every 1 rotation, the belt moves 120 MM
-
-        int target = (int)(((TICKS_PER_REV)/(38.2*Math.PI)) * mm); //
-
-        double power = MAX_POWER;
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        if (dir.equals("up")){
-            //go down target ticks
-            //neg power neg target
-            power *= -1;
-            target *= -1;
+        double power = slideControl.update(inches,
+                distance_slide.getDistance(DistanceUnit.INCH));
+        /* continues sending power to motor until either
+        * a) the distance read is around 2.1 inches or
+        * b) the power is a set threshold*/
+        while (distance_slide.getDistance(DistanceUnit.INCH) > 2.1 && power > 0.01){
+            slide.setPower(power);
+            power = slideControl.update(inches,
+                    distance_slide.getDistance(DistanceUnit.INCH));
         }
-        slide.setTargetPosition(target);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        slide.setPower(power);
-        while (slide.isBusy()){
-            // telemetry.update();
-        }
-        slide.setPower(FEEDFORWARD_SLIDE);
     }
     // SERVO RANGE FROM 0 - 1
     public void open(){
@@ -363,6 +375,5 @@ public class Robot{
         left.setPosition(closed_pos);
         right.setPosition(open_pos);
     }
-    // accesser methods--for debugging purposes
 }
 
