@@ -34,12 +34,12 @@ public class TwoSampleAndPark extends LinearOpMode {
             robot.close();
             robot.liftSlide(17.5, "up");
 
-            robot.moveRobotwEncoders("forward", 29, 0.5);
+            robot.goToPosition(0, 29, 0.5);
             robot.liftSlide(6, "down");
             robot.open();
-            robot.moveRobotwEncoders("backward", 24, 0.5);
+            robot.goToPosition(0, 5, 0.5);
             robot.turnDegrees(90, "counterclockwise", 0.5);
-            robot.moveRobotwEncoders("forward", 50, 0.5);
+            robot.goToPosition(0, 50, 0.5);
             // strafe left until camera detects sample
         }
     }

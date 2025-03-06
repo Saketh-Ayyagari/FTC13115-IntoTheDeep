@@ -117,7 +117,7 @@ public class RobotRelativeTeleop extends OpMode
             state = "lock";
         }
         switch(state){
-            case "lock": // turn value is PD output
+            case "lock": // turn value is proportional output
                 turn = angle_lock.update(setpoint_angle, imu.getRobotYawPitchRollAngles().getYaw());
                 break;
             case "unlock": // non-zero turn value changes setpoint
