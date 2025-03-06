@@ -167,7 +167,7 @@ public class Robot{
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         final double TICKS_PER_REV = 537.7; // encoder resolution
-        final double WHEEL_DIAMETER = 96 / 25.4; // inches
+        final double WHEEL_DIAMETER = 96 / 25.4; // wheel diameter in inches
         final double TICKS_PER_IN = TICKS_PER_REV / (WHEEL_DIAMETER*Math.PI);
 
         double target = inches * TICKS_PER_IN;; // may have to find a way to convert from inches to ticks
@@ -299,12 +299,6 @@ public class Robot{
         frontRight.setPower(rightPowerLevel);
         backRight.setPower(rightPowerLevel);
 
-//
-//        // Wait until the motor reaches the target position
-       while (frontLeft.isBusy()) {
-            telemetry.update();
-        }
-
     }
      // lifts extender to change orientation of the sample grip
     public void liftServo(double position){
@@ -322,50 +316,36 @@ public class Robot{
             slide.setPower(power_hold);
         }
     }
-//    // rotates pulley a certain number of rotations to lift the slide
-//    // two cases: up and down
-//    public void liftSlide(double inches, String dir){
-//        final double TICKS_PER_REV = 537.7; // ticks per revolution
-//        final double INCHES_PER_REV = 120/25.4; // for every 1 rotation, the belt moves 120 MM
-//
-//        int target = (int)(((TICKS_PER_REV)/(INCHES_PER_REV)) * inches);
-//
-//        double power = MAX_POWER;
-//        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//
-//        if (dir.equals("up")){
-//            //go down target ticks
-//            //neg power neg target
-//            power *= -1;
-//            target *= -1;
-//        }
-////        slide.setTargetPosition(target);
-////        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-////        slide.setPower(power);
-//        int error = target - slide.getCurrentPosition();
-//        while (Math.abs(error) > 5){
-//            // moves the slide until the error between the target and current position becomes less than 5 ticks
-//            slide.setPower(Range.clip(slideControl.update(target,
-//                    slide.getCurrentPosition()), -1, 1));
-//            error = target - slide.getCurrentPosition();
-//        }
-//        // constant power sent to slide motor from there
-//    }
-    // inches represent the global position of the slide
+    // rotates pulley a certain number of rotations to lift the slide
+    // two cases: up and down
     public void liftSlide(double inches, String dir){
-        double power = slideControl.update(inches,
-                distance_slide.getDistance(DistanceUnit.INCH));
-        /* continues sending power to motor until either
-        * a) the distance read is around 2.1 inches or
-        * b) the power is a set threshold*/
-        while (distance_slide.getDistance(DistanceUnit.INCH) > 2.1 && power > 0.01){
-            slide.setPower(power);
-            power = slideControl.update(inches,
-                    distance_slide.getDistance(DistanceUnit.INCH));
-        }
+        final double TICKS_PER_REV = 537.7; // ticks per revolution
+        final double INCHES_PER_REV = 120/25.4; // for every 1 rotation, the belt moves 120 MM
 
+        int target = (int)(((TICKS_PER_REV)/(INCHES_PER_REV)) * inches);
+
+        double power = MAX_POWER;
+        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (dir.equals("up")){
+            //go down target ticks
+            //neg power neg target
+            power *= -1;
+            target *= -1;
+        }
+        slide.setTargetPosition(target);
+        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        slide.setPower(power);
+        while (slide.isBusy()){
+
+        }
+        int error = target - slide.getCurrentPosition();
+        // constant power sent to slide motor from there
+        slide.setPower(Range.clip(slideControl.update(target,
+                slide.getCurrentPosition()), -1, 1));
     }
+
     // SERVO RANGE FROM 0 - 1
     public void open(){
         left.setPosition(open_pos);
