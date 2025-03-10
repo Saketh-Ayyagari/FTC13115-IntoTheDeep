@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;// Use for teleop
 import static android.os.SystemClock.sleep;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -26,7 +27,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 
 @TeleOp(name="RobotRelativeTeleop", group="Iterative OpMode")
-//@Disabled
+@Disabled
 public class RobotRelativeTeleop extends OpMode
 {
     // Standard member variables
@@ -72,8 +73,9 @@ public class RobotRelativeTeleop extends OpMode
     }
     @Override
     public void init() {
-        initCamera();
         drivetrain.init(hardwareMap);
+        initCamera();
+
 
         telemetry.addData("Status", "Initialized");
         // initializing IMU with parameters
@@ -152,7 +154,7 @@ public class RobotRelativeTeleop extends OpMode
             drivetrain.liftServo(0.01);
         }
         if (gamepad1.b){
-            drivetrain.liftServo(0.35);
+            drivetrain.liftServo(0.4);
         }
         // second controller controls: semi-autonomous
         if (gamepad2.a){
@@ -182,12 +184,8 @@ public class RobotRelativeTeleop extends OpMode
             telemetry.addData("Tracked Color", "Yellow");
         }
         telemetry.addData("Contour Center: ", pipeline.get_contour_center());
-        // field-relative driving instead of robot-relative driving
 
-         // gets heading in radians
-         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
-         double angle = orientation.getYaw(AngleUnit.RADIANS);
-
+        // sending power to motors
         drivetrain.powerChassisMotors(drive, turn, strafe);
         drivetrain.liftSlide(lift);
 
@@ -200,7 +198,8 @@ public class RobotRelativeTeleop extends OpMode
         telemetry.addData("Left Pos: ", drivetrain.left.getPosition());
         telemetry.addData("Right Pos: ", drivetrain.right.getPosition());
         telemetry.addData("Runtime", runtime.seconds());
-        telemetry.addData("IMU Angle", angle);
+        telemetry.addData("IMU Angle",
+                imu.getRobotYawPitchRollAngles().getYaw());
         telemetry.update();
     }
     public double PIDControl(double setpoint, double current){

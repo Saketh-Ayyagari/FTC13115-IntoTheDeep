@@ -155,42 +155,74 @@ public class Robot{
         return TICKS_PER_IN * inches;
     }
     /**
-     * Uses encoders to move to position relative to the start
-     * "horizontal" and "vertical" variables are in INCHES
-     * NOTE: X REFERS TO STRAFING, Y REFERS TO DRIVING FORWARD/BACKWARD
+     * Uses encoders to move in specific directions
+     * forward = moving forward
+     * backward = moving backward
+     * counterclockwise = moving counterclockwise
+     * clockwise = moving clockwise
      */
-    public void goToPosition(double horizontal, double vertical, double speed){
+    public void moveRobotwEncoders(String direction, double inches, double speed){
         // Set the motor to run using encoders
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // converts from inches to ticks for each direction
-        double target_x = this.inchesToTicks(horizontal);
-        double target_y = this.inchesToTicks(vertical);
+        // Reset the encoder
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        double y_speed = speed;
-        double x_speed = speed;
+        // converting inches to ticks
+        double target = inchesToTicks(inches);
 
-        /* sets speed based on difference between old and new position
-         * i.e. if position in either direction is set to one smaller than the current, the speed will be reversed
-         */
-        if (target_x - prev_x < 0){
-            x_speed *= -1;
+        double frontLeftPower = speed;
+        double backLeftPower = speed;
+        double frontRightPower = speed;
+        double backRightPower = speed;
+
+        // different scenarios based on direction specified
+        switch(direction){
+            case "forward":
+                frontLeft.setTargetPosition((int)target);
+                backLeft.setTargetPosition((int)target);
+                frontRight.setTargetPosition((int)target);
+                backRight.setTargetPosition((int)target);
+                break;
+            case "backward":
+                frontLeft.setTargetPosition(-(int) target);
+                backLeft.setTargetPosition(-(int) target);
+                frontRight.setTargetPosition(-(int) target);
+                backRight.setTargetPosition(-(int) target);
+
+                frontLeftPower *= -1;
+                backLeftPower *= -1;
+                frontRightPower *= -1;
+                backRightPower *= -1;
+
+                break;
+            case "left":
+                frontLeft.setTargetPosition(-(int)target);
+                backLeft.setTargetPosition((int)target);
+                frontRight.setTargetPosition((int)target);
+                backRight.setTargetPosition(-(int)target);
+
+                frontLeftPower *= -1;
+                backLeftPower *= -1;
+
+                break;
+            case "right":
+                frontLeft.setTargetPosition((int)target);
+                backLeft.setTargetPosition(-(int)target);
+                frontRight.setTargetPosition(-(int)target);
+                backRight.setTargetPosition((int)target);
+
+                frontRightPower *= -1;
+                backRightPower *= -1;
+
+                break;
         }
-        if (target_y - prev_y < 0){
-            y_speed *= -1;
-        }
-        double target_total = Math.sqrt(Math.pow(target_y, 2) +
-                                Math.pow(target_x, 2)
-        );
-
-        frontLeft.setTargetPosition((int)target_total);
-        backLeft.setTargetPosition((int)target_total);
-        frontRight.setTargetPosition((int)target_total);
-        backRight.setTargetPosition((int)target_total);
-        this.powerChassisMotors(y_speed, 0, x_speed);
 
         // Set the motor to run to the target position
         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -199,9 +231,14 @@ public class Robot{
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
+        // Set the motor power
+        frontLeft.setPower(frontLeftPower);
+        backLeft.setPower(backLeftPower);
+        frontRight.setPower(frontRightPower);
+        backRight.setPower(backRightPower);
+
         // Wait until the motors reach the target position
-        while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) {
-            // Optionally, you can add some telemetry or logging here
+        while (frontLeft.isBusy() && backLeft.isBusy() && frontRight.isBusy() && backRight.isBusy()) { // Optionally, you can add some telemetry or logging here
             //telemetry.update();
         }
         this.brake();

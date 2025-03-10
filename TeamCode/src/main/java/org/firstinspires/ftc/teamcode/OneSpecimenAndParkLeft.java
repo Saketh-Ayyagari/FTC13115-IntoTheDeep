@@ -6,11 +6,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-
-@Autonomous(name="TwoSampleAuto", group="Linear OpMode")
+/**
+ * Places one specimen and parks in the observation zone
+ * USE IF  YOU'RE STARTING ON THE LEFT
+ * **/
+@Autonomous(name="OneSpecimenAndPark", group="Linear OpMode")
 //@Disabled
-public class TwoSampleAndPark extends LinearOpMode {
-
+public class OneSpecimenAndParkLeft extends LinearOpMode{
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private final Robot robot = new Robot(0.5);
@@ -19,9 +21,11 @@ public class TwoSampleAndPark extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
+        // initializing hardware
         robot.init(hardwareMap);
-
+        // closing on specimen and going to initial extension position
+        robot.close();
+        robot.liftServo(0.35);
         // Wait for the game to start (driver presses START)
         waitForStart();
 
@@ -31,16 +35,13 @@ public class TwoSampleAndPark extends LinearOpMode {
          * Park
          **/
         if (opModeIsActive()){
-            robot.close();
             robot.liftSlide(17.5, "up");
 
-            robot.goToPosition(0, 29, 0.5);
-            robot.liftSlide(6, "down");
+            robot.moveRobotwEncoders("forward", 30, 0.5);
+            robot.liftSlide(7, "down");
             robot.open();
-            robot.goToPosition(0, 5, 0.5);
-            robot.turnDegrees(90, "counterclockwise", 0.5);
-            robot.goToPosition(0, 50, 0.5);
-            // strafe left until camera detects sample
+            robot.moveRobotwEncoders("backward", 24, 0.5);
+            robot.moveRobotwEncoders("right", 50, 0.5);
         }
     }
 }
