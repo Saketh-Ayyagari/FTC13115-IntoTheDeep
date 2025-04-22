@@ -82,11 +82,11 @@ public class Robot{
         backLeft = hardwareMp.get(DcMotor.class, "backLeft"); //port 1
         frontLeft = hardwareMp.get(DcMotor.class, "frontLeft"); //port 0
 
-        slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
-        extend = hardwareMp.get(Servo.class, "extend");
-        left = hardwareMp.get(Servo.class, "left");
-        right = hardwareMp.get(Servo.class, "right");
-        distance_slide = hardwareMp.get(Rev2mDistanceSensor.class, "slide-distance");
+//        slide = hardwareMp.get(DcMotor.class, "slide"); // port ___ on Expansion Hub
+//        extend = hardwareMp.get(Servo.class, "extend");
+//        left = hardwareMp.get(Servo.class, "left");
+//        right = hardwareMp.get(Servo.class, "right");
+//        distance_slide = hardwareMp.get(Rev2mDistanceSensor.class, "slide-distance");
 
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -96,24 +96,30 @@ public class Robot{
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
-        // resetting the encoders
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
+//        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //start at 0 power
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
+    /*
+    * Positive power = rotate counterclockwise (causes heading to become larger)
+    * Negative power = rotate clockwise (causes heading to become smaller)
+    * Just like unit circle
+    * */
+    public void rotate(double power){
+        frontLeft.setPower(power);
+        backLeft.setPower(power);
+        frontRight.setPower(-power);
+        backRight.setPower(-power);
+    }
+    /*
+     * Negative Power = strafe left
+     * Positive power = strafe right
+     * */
     public void brake(){
         backRight.setPower(0);
         backLeft.setPower(0);
@@ -141,20 +147,6 @@ public class Robot{
     }
 
     /**
-     * Given a value in inches, return the number of ticks a motor must rotate.
-     * NOTE THE DIMENSIONS OF YOUR WHEELS + ENCODER RESOLUTION
-     * @param inches
-     * @return ticks (double)
-     */
-    private double inchesToTicks(double inches){
-        // constants for conversion from ticks to inches
-        final double TICKS_PER_REV = 537.7; // encoder resolution
-        final double WHEEL_DIAMETER = 96 / 25.4; // wheel diameter in inches
-        final double TICKS_PER_IN = TICKS_PER_REV / (WHEEL_DIAMETER*Math.PI);
-
-        return TICKS_PER_IN * inches;
-    }
-    /**
      * Uses encoders to move in specific directions
      * forward = moving forward
      * backward = moving backward
@@ -174,8 +166,11 @@ public class Robot{
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        // converting inches to ticks
-        double target = inchesToTicks(inches);
+        final double TICKS_PER_REV = 537.7; // encoder resolution
+        final double WHEEL_DIAMETER = 96 / 25.4; // inches
+        final double TICKS_PER_IN = TICKS_PER_REV / (WHEEL_DIAMETER*Math.PI);
+
+        double target = inches * TICKS_PER_IN;; // may have to find a way to convert from inches to ticks
 
         double frontLeftPower = speed;
         double backLeftPower = speed;
@@ -207,7 +202,7 @@ public class Robot{
                 backLeft.setTargetPosition((int)target);
                 frontRight.setTargetPosition((int)target);
                 backRight.setTargetPosition(-(int)target);
-
+                
                 frontLeftPower *= -1;
                 backLeftPower *= -1;
 
@@ -217,7 +212,7 @@ public class Robot{
                 backLeft.setTargetPosition(-(int)target);
                 frontRight.setTargetPosition(-(int)target);
                 backRight.setTargetPosition((int)target);
-
+                
                 frontRightPower *= -1;
                 backRightPower *= -1;
 
@@ -304,6 +299,12 @@ public class Robot{
         frontRight.setPower(rightPowerLevel);
         backRight.setPower(rightPowerLevel);
 
+//
+//        // Wait until the motor reaches the target position
+       while (frontLeft.isBusy()) {
+            telemetry.update();
+        }
+
     }
      // lifts extender to change orientation of the sample grip
     public void liftServo(double position){
@@ -321,34 +322,49 @@ public class Robot{
             slide.setPower(power_hold);
         }
     }
-    // rotates pulley a certain number of rotations to lift the slide
-    // two cases: up and down
+//    // rotates pulley a certain number of rotations to lift the slide
+//    // two cases: up and down
+//    public void liftSlide(double inches, String dir){
+//        final double TICKS_PER_REV = 537.7; // ticks per revolution
+//        final double INCHES_PER_REV = 120/25.4; // for every 1 rotation, the belt moves 120 MM
+//
+//        int target = (int)(((TICKS_PER_REV)/(INCHES_PER_REV)) * inches);
+//
+//        double power = MAX_POWER;
+//        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//
+//        if (dir.equals("up")){
+//            //go down target ticks
+//            //neg power neg target
+//            power *= -1;
+//            target *= -1;
+//        }
+////        slide.setTargetPosition(target);
+////        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+////        slide.setPower(power);
+//        int error = target - slide.getCurrentPosition();
+//        while (Math.abs(error) > 5){
+//            // moves the slide until the error between the target and current position becomes less than 5 ticks
+//            slide.setPower(Range.clip(slideControl.update(target,
+//                    slide.getCurrentPosition()), -1, 1));
+//            error = target - slide.getCurrentPosition();
+//        }
+//        // constant power sent to slide motor from there
+//    }
+    // inches represent the global position of the slide
     public void liftSlide(double inches, String dir){
-        final double TICKS_PER_REV = 537.7; // ticks per revolution
-        final double INCHES_PER_REV = 120/25.4; // for every 1 rotation, the belt moves 120 MM
-
-        int target = (int)(((TICKS_PER_REV)/(INCHES_PER_REV)) * inches);
-
-        double power = MAX_POWER;
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        if (dir.equals("up")){
-            //go down target ticks
-            //neg power neg target
-            power *= -1;
-            target *= -1;
+        double power = slideControl.update(inches,
+                distance_slide.getDistance(DistanceUnit.INCH));
+        /* continues sending power to motor until either
+        * a) the distance read is around 2.1 inches or
+        * b) the power is a set threshold*/
+        while (distance_slide.getDistance(DistanceUnit.INCH) > 2.1 && power > 0.01){
+            slide.setPower(power);
+            power = slideControl.update(inches,
+                    distance_slide.getDistance(DistanceUnit.INCH));
         }
-        slide.setTargetPosition(target);
-        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        slide.setPower(power);
-        while (slide.isBusy()){
 
-        }
-        int error = target - slide.getCurrentPosition();
-        // constant power sent to slide motor from there
-        slide.setPower(Range.clip(slideControl.update(target,
-                slide.getCurrentPosition()), -1, 1));
     }
     // SERVO RANGE FROM 0 - 1
     public void open(){

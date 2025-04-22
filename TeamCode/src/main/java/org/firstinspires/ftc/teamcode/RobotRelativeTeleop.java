@@ -3,14 +3,12 @@ package org.firstinspires.ftc.teamcode;// Use for teleop
 import static android.os.SystemClock.sleep;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.ftccommon.internal.manualcontrol.parameters.ImuParameters;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -27,14 +25,15 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 
 @TeleOp(name="RobotRelativeTeleop", group="Iterative OpMode")
-@Disabled
+//@Disabled
 public class RobotRelativeTeleop extends OpMode
 {
     // Standard member variables
     private ElapsedTime runtime = new ElapsedTime();
     private final double MAX_POWER = 0.6;
     // robot classes/components
-    private final Robot drivetrain = new Robot(MAX_POWER);
+    private Robot drivetrain = new Robot(MAX_POWER);
+    private IMU.Parameters myIMUParameters;
     private IMU imu;
     // camera variables: 480p resolution
     private static final int CAMERA_WIDTH = 640;
@@ -47,9 +46,10 @@ public class RobotRelativeTeleop extends OpMode
     private final double Kd = 0.0;
     private Double prevError = 0.0;
     private double setpoint_angle;
+    private int setpoint_slide;
 
     private final PIDController slide_control = new PIDController(0.075);
-    private final PIDController angle_lock = new PIDController(-0.015, true);
+    private final PIDController angle_lock = new PIDController(0.075, true);
     private void initCamera(){
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "cameraMonitorViewId", "id",
@@ -73,13 +73,12 @@ public class RobotRelativeTeleop extends OpMode
     }
     @Override
     public void init() {
-        drivetrain.init(hardwareMap);
         initCamera();
-
+        drivetrain.init(hardwareMap);
 
         telemetry.addData("Status", "Initialized");
         // initializing IMU with parameters
-        IMU.Parameters myIMUParameters = new IMU.Parameters(
+        myIMUParameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
                         RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)
@@ -90,7 +89,7 @@ public class RobotRelativeTeleop extends OpMode
         imu.resetYaw();
         setpoint_angle = imu.getRobotYawPitchRollAngles().getYaw();
         // initialize arm to be in upper position
-        drivetrain.liftServo(0.34);
+        drivetrain.liftServo(0.35);
     }
     /*
      * Code to run ONCE when the driver hits START
@@ -112,14 +111,14 @@ public class RobotRelativeTeleop extends OpMode
         String state = "unlock";
         // IMU-Assist for Teleop
         // changes state variable based on controller input
-        if (Math.abs(turn) > 0.01){
+        if (Math.abs(turn) < 0.01){
             state = "unlock";
         }
         else{
             state = "lock";
         }
         switch(state){
-            case "lock": // turn value is proportional output
+            case "lock": // turn value is PD output
                 turn = angle_lock.update(setpoint_angle, imu.getRobotYawPitchRollAngles().getYaw());
                 break;
             case "unlock": // non-zero turn value changes setpoint
@@ -154,7 +153,7 @@ public class RobotRelativeTeleop extends OpMode
             drivetrain.liftServo(0.01);
         }
         if (gamepad1.b){
-            drivetrain.liftServo(0.4);
+            drivetrain.liftServo(0.35);
         }
         // second controller controls: semi-autonomous
         if (gamepad2.a){
@@ -184,8 +183,12 @@ public class RobotRelativeTeleop extends OpMode
             telemetry.addData("Tracked Color", "Yellow");
         }
         telemetry.addData("Contour Center: ", pipeline.get_contour_center());
+        // field-relative driving instead of robot-relative driving
 
-        // sending power to motors
+         // gets heading in radians
+         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+         double angle = orientation.getYaw(AngleUnit.RADIANS);
+
         drivetrain.powerChassisMotors(drive, turn, strafe);
         drivetrain.liftSlide(lift);
 
@@ -198,8 +201,7 @@ public class RobotRelativeTeleop extends OpMode
         telemetry.addData("Left Pos: ", drivetrain.left.getPosition());
         telemetry.addData("Right Pos: ", drivetrain.right.getPosition());
         telemetry.addData("Runtime", runtime.seconds());
-        telemetry.addData("IMU Angle",
-                imu.getRobotYawPitchRollAngles().getYaw());
+        telemetry.addData("IMU Angle", angle);
         telemetry.update();
     }
     public double PIDControl(double setpoint, double current){
