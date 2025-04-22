@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * Test Suite for different motors. Comment anything needed for customization
  * **/
 @TeleOp(name="MotorTest", group="Linear OpMode")
-//@Disabled
+@Disabled
 public class MotorTest extends LinearOpMode {
     private final Robot robot = new Robot(0.8);
     private ElapsedTime runtime = new ElapsedTime();

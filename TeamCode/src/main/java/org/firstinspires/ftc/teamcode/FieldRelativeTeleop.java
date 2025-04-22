@@ -24,7 +24,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
  * Field-Relative Teleop. USE ONLY IF IMU IS INTIALIZED TO 0 RAD VERTICALLY TO FIELD
  */
 @TeleOp(name="FieldRelativeTeleOp", group="Iterative OpMode")
-@Disabled
+//@Disabled
 public class FieldRelativeTeleop extends OpMode
 {
     // Standard member variables

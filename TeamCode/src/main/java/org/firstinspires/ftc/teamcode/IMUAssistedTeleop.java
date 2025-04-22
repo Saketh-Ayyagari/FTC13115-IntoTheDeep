@@ -29,7 +29,7 @@ import java.util.Set;
  * **/
 
 @TeleOp(name="IMUAssistedTeleop", group="Iterative Opmode")
-@Disabled
+//@Disabled
 public class IMUAssistedTeleop extends OpMode{
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
@@ -116,7 +116,6 @@ public class IMUAssistedTeleop extends OpMode{
         drivetrain.powerChassisMotors(drive, turn, strafe);
 
 
-        //drivetrain.powerMotors(drive, turn, strafe);
 
         telemetry.addData("frontLeftPower", drivetrain.frontLeft.getPower());
         telemetry.addData("frontRightPower", drivetrain.frontRight.getPower());
